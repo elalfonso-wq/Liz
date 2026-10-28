@@ -13,6 +13,10 @@
   <!-- Material Symbols Outlined -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
 
+  <!-- Firebase App & Firestore SDKs (Google Cloud Database) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
   <!-- Tailwind Script -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   
@@ -108,9 +112,9 @@
         </button>
         <span class="material-symbols-outlined text-primary text-[26px]">clinical_notes</span>
         <span class="text-xl font-bold text-primary tracking-tight">FisioConecta</span>
-        <div id="badge-db-status" class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded-full border border-outline-variant/40 ml-1 cursor-pointer" title="Base de Datos">
+        <div id="badge-db-status" class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded-full border border-outline-variant/40 ml-1 cursor-pointer" title="Base de Datos en la Nube (Google Firestore)">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
-          <span id="label-db-status" class="text-[11px] text-primary font-semibold">Modo Clínico Local</span>
+          <span id="label-db-status" class="text-[11px] text-primary font-semibold">Firebase Conectado</span>
         </div>
       </div>
       

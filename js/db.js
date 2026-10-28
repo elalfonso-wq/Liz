@@ -1,15 +1,25 @@
 /**
- * FisioConecta - Capa de Base de Datos y Almacenamiento
- * Soporta modo local inmediato (localStorage) y conexión en la nube con Firebase Firestore.
+ * FisioConecta - Capa de Base de Datos y Almacenamiento en la Nube
+ * Conectado en tiempo real con Google Firebase Firestore
+ * Incluye respaldo local automático (localStorage) para funcionamiento offline.
  */
+
+// Configuración oficial de Firebase del proyecto FisioConecta
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC3sajbyEs9aVMeb6xmEtNle-ADHvvg-GA",
+  authDomain: "fisioconecta-e8650.firebaseapp.com",
+  projectId: "fisioconecta-e8650",
+  storageBucket: "fisioconecta-e8650.firebasestorage.app",
+  messagingSenderId: "771323750850",
+  appId: "1:771323750850:web:b6f32669f8b1448a420e5b"
+};
 
 const DB_KEYS = {
   PATIENTS: 'fisioconecta_patients_v1',
-  SESSIONS: 'fisioconecta_sessions_v1',
-  FIREBASE_CONFIG: 'fisioconecta_firebase_config'
+  SESSIONS: 'fisioconecta_sessions_v1'
 };
 
-// Datos iniciales de demostración clínica
+// Datos clínicos de base para inicializar la nube si está vacía
 const SEED_PATIENTS = [
   {
     codigo: 'PAC-842',
@@ -47,7 +57,6 @@ const SEED_PATIENTS = [
 ];
 
 const SEED_SESSIONS = [
-  // Sesiones de PAC-842
   {
     id: 'ses-842-1',
     codigoPaciente: 'PAC-842',
@@ -115,8 +124,6 @@ const SEED_SESSIONS = [
     ],
     notas: 'Evolución muy favorable. Dolor leve sólo al final del esfuerzo máximo. Puede caminar 45 min sin molestias.'
   },
-
-  // Sesiones de PAC-719
   {
     id: 'ses-719-1',
     codigoPaciente: 'PAC-719',
@@ -156,8 +163,6 @@ const SEED_SESSIONS = [
     ],
     notas: 'Mejora en tolerancia al permanecer sentado en jornada laboral.'
   },
-
-  // Sesiones de PAC-603
   {
     id: 'ses-603-1',
     codigoPaciente: 'PAC-603',
@@ -214,15 +219,90 @@ const SEED_SESSIONS = [
 
 class FisioDB {
   constructor() {
+    this.firestore = null;
+    this.isCloudEnabled = false;
     this.init();
   }
 
   init() {
+    // 1. Respaldo local inmediato para render instantáneo
     if (!localStorage.getItem(DB_KEYS.PATIENTS)) {
-      this.savePatients(SEED_PATIENTS);
+      localStorage.setItem(DB_KEYS.PATIENTS, JSON.stringify(SEED_PATIENTS));
     }
     if (!localStorage.getItem(DB_KEYS.SESSIONS)) {
-      this.saveSessions(SEED_SESSIONS);
+      localStorage.setItem(DB_KEYS.SESSIONS, JSON.stringify(SEED_SESSIONS));
+    }
+
+    // 2. Conectar con Firebase Firestore si el SDK está cargado
+    if (typeof firebase !== 'undefined' && FIREBASE_CONFIG.apiKey) {
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(FIREBASE_CONFIG);
+        }
+        this.firestore = firebase.firestore();
+        this.isCloudEnabled = true;
+        console.log('✅ Firebase Firestore conectado exitosamente.');
+
+        // Activar sincronización en la nube y tiempo real
+        this.syncWithCloud();
+      } catch (err) {
+        console.warn('⚠️ Error al inicializar Firebase, operando en modo local:', err);
+        this.isCloudEnabled = false;
+      }
+    }
+  }
+
+  /**
+   * Sincronización bidireccional con Firestore en la nube
+   */
+  async syncWithCloud() {
+    if (!this.isCloudEnabled || !this.firestore) return;
+
+    try {
+      // 1. Verificar si existen pacientes en Firestore
+      const patientsSnapshot = await this.firestore.collection('pacientes').get();
+      if (patientsSnapshot.empty) {
+        console.log('Inicializando datos en Firebase Firestore...');
+        // Subir pacientes demo a la nube
+        const batch = this.firestore.batch();
+        SEED_PATIENTS.forEach(p => {
+          const docRef = this.firestore.collection('pacientes').doc(p.codigo);
+          batch.set(docRef, p);
+        });
+        SEED_SESSIONS.forEach(s => {
+          const docRef = this.firestore.collection('sesiones').doc(s.id);
+          batch.set(docRef, s);
+        });
+        await batch.commit();
+        console.log('✅ Datos iniciales guardados en Firebase Firestore.');
+      }
+
+      // 2. Escuchar cambios en tiempo real en la colección 'pacientes'
+      this.firestore.collection('pacientes').onSnapshot((snapshot) => {
+        const cloudPatients = [];
+        snapshot.forEach(doc => cloudPatients.push(doc.data()));
+        if (cloudPatients.length > 0) {
+          localStorage.setItem(DB_KEYS.PATIENTS, JSON.stringify(cloudPatients));
+          this.dispatchChangeEvent('patients');
+        }
+      }, (error) => {
+        console.warn('Lectura Firestore pacientes:', error);
+      });
+
+      // 3. Escuchar cambios en tiempo real en la colección 'sesiones'
+      this.firestore.collection('sesiones').onSnapshot((snapshot) => {
+        const cloudSessions = [];
+        snapshot.forEach(doc => cloudSessions.push(doc.data()));
+        if (cloudSessions.length > 0) {
+          localStorage.setItem(DB_KEYS.SESSIONS, JSON.stringify(cloudSessions));
+          this.dispatchChangeEvent('sessions');
+        }
+      }, (error) => {
+        console.warn('Lectura Firestore sesiones:', error);
+      });
+
+    } catch (err) {
+      console.warn('Error en syncWithCloud:', err);
     }
   }
 
@@ -232,12 +312,11 @@ class FisioDB {
       const data = localStorage.getItem(DB_KEYS.PATIENTS);
       return data ? JSON.parse(data) : [];
     } catch (e) {
-      console.error('Error al leer pacientes:', e);
       return [];
     }
   }
 
-  savePatients(patients) {
+  savePatientsLocal(patients) {
     localStorage.setItem(DB_KEYS.PATIENTS, JSON.stringify(patients));
     this.dispatchChangeEvent('patients');
   }
@@ -269,20 +348,46 @@ class FisioDB {
       ultimaSesionFecha: 'Recién registrado'
     };
 
+    // Guardar en local de inmediato
     list.unshift(newPatient);
-    this.savePatients(list);
+    this.savePatientsLocal(list);
+
+    // Guardar en Firebase Firestore
+    if (this.isCloudEnabled && this.firestore) {
+      this.firestore.collection('pacientes').doc(newPatient.codigo).set(newPatient)
+        .catch(err => console.error('Error guardando paciente en Firestore:', err));
+    }
+
     return newPatient;
   }
 
   deletePatient(codigo) {
     if (!codigo) return;
+    const cod = codigo.trim().toUpperCase();
+
+    // Local
     let list = this.getPatients();
-    list = list.filter(p => p.codigo.trim().toUpperCase() !== codigo.trim().toUpperCase());
-    this.savePatients(list);
+    list = list.filter(p => p.codigo.trim().toUpperCase() !== cod);
+    this.savePatientsLocal(list);
 
     let sessions = this.getAllSessions();
-    sessions = sessions.filter(s => s.codigoPaciente.trim().toUpperCase() !== codigo.trim().toUpperCase());
-    this.saveSessions(sessions);
+    sessions = sessions.filter(s => s.codigoPaciente.trim().toUpperCase() !== cod);
+    this.saveSessionsLocal(sessions);
+
+    // En Firestore
+    if (this.isCloudEnabled && this.firestore) {
+      this.firestore.collection('pacientes').doc(cod).delete()
+        .catch(err => console.error('Error borrando paciente en Firestore:', err));
+
+      // Borrar sesiones asociadas en la nube
+      this.firestore.collection('sesiones').where('codigoPaciente', '==', cod).get()
+        .then(snapshot => {
+          const batch = this.firestore.batch();
+          snapshot.forEach(doc => batch.delete(doc.ref));
+          return batch.commit();
+        })
+        .catch(err => console.error('Error borrando sesiones asociadas en Firestore:', err));
+    }
   }
 
   generateUniqueCode() {
@@ -303,12 +408,11 @@ class FisioDB {
       const data = localStorage.getItem(DB_KEYS.SESSIONS);
       return data ? JSON.parse(data) : [];
     } catch (e) {
-      console.error('Error al leer sesiones:', e);
       return [];
     }
   }
 
-  saveSessions(sessions) {
+  saveSessionsLocal(sessions) {
     localStorage.setItem(DB_KEYS.SESSIONS, JSON.stringify(sessions));
     this.dispatchChangeEvent('sessions');
   }
@@ -319,12 +423,7 @@ class FisioDB {
     const cod = codigo.trim().toUpperCase();
     return all
       .filter(s => s.codigoPaciente.trim().toUpperCase() === cod)
-      .sort((a, b) => new Date(a.fecha) - new Date(b.fecha)); // Orden cronológico ascendente
-  }
-
-  getSessionById(id) {
-    const all = this.getAllSessions();
-    return all.find(s => s.id === id) || null;
+      .sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
   }
 
   addSession(sessionData) {
@@ -343,11 +442,13 @@ class FisioDB {
     };
 
     all.push(newSession);
-    this.saveSessions(all);
+    this.saveSessionsLocal(all);
 
-    // Actualizar ficha del paciente
+    // Actualizar ficha del paciente localmente
     const patients = this.getPatients();
     const patientIndex = patients.findIndex(p => p.codigo.toUpperCase() === codigoPaciente);
+    let updatedPatientData = null;
+
     if (patientIndex !== -1) {
       const patientSessions = all.filter(s => s.codigoPaciente.toUpperCase() === codigoPaciente);
       patients[patientIndex].totalSesiones = patientSessions.length;
@@ -357,10 +458,24 @@ class FisioDB {
       const formattedDate = dateObj.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
       patients[patientIndex].ultimaSesionFecha = formattedDate;
 
-      if (sessionData.fase) {
-        patients[patientIndex].fase = sessionData.fase;
+      updatedPatientData = {
+        totalSesiones: patientSessions.length,
+        ultimoDolor: newSession.nivelDolor,
+        ultimaSesionFecha: formattedDate
+      };
+
+      this.savePatientsLocal(patients);
+    }
+
+    // Guardar en Firestore
+    if (this.isCloudEnabled && this.firestore) {
+      this.firestore.collection('sesiones').doc(newSession.id).set(newSession)
+        .catch(err => console.error('Error guardando sesión en Firestore:', err));
+
+      if (updatedPatientData) {
+        this.firestore.collection('pacientes').doc(codigoPaciente).update(updatedPatientData)
+          .catch(err => console.error('Error actualizando paciente en Firestore:', err));
       }
-      this.savePatients(patients);
     }
 
     return newSession;
@@ -382,7 +497,7 @@ class FisioDB {
 
     const dolorInicial = sessions[0].nivelDolor;
     const dolorActual = sessions[sessions.length - 1].nivelDolor;
-    const diferencia = dolorActual - dolorInicial; // negativo significa reducción del dolor (mejora)
+    const diferencia = dolorActual - dolorInicial;
     
     let porcentajeMejora = 0;
     if (dolorInicial > 0) {
@@ -405,23 +520,8 @@ class FisioDB {
     };
   }
 
-  // ================= CONEXIÓN FIREBASE (Preparada para Fase Final) =================
-  getFirebaseConfig() {
-    try {
-      const data = localStorage.getItem(DB_KEYS.FIREBASE_CONFIG);
-      return data ? JSON.parse(data) : null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  saveFirebaseConfig(config) {
-    localStorage.setItem(DB_KEYS.FIREBASE_CONFIG, JSON.stringify(config));
-    this.dispatchChangeEvent('firebase');
-  }
-
   isFirebaseConnected() {
-    return Boolean(this.getFirebaseConfig());
+    return this.isCloudEnabled;
   }
 
   dispatchChangeEvent(entity) {
