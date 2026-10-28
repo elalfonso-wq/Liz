@@ -286,6 +286,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (filtered.length === 0) {
       emptyState.classList.remove('hidden');
+      const emptyDesc = document.getElementById('empty-state-desc');
+      const emptyAction = document.getElementById('empty-state-action');
+      const emptyBtnText = document.getElementById('btn-empty-register-text');
+
+      if (state.searchQuery) {
+        if (emptyAction) emptyAction.classList.remove('hidden');
+        if (emptyBtnText) emptyBtnText.textContent = `+ Registrar ficha "${state.searchQuery.toUpperCase()}"`;
+        if (emptyDesc) emptyDesc.textContent = `El paciente "${state.searchQuery.toUpperCase()}" aún no ha sido creado. ¿Deseas darlo de alta ahora?`;
+      } else {
+        if (emptyAction) emptyAction.classList.add('hidden');
+        if (emptyDesc) emptyDesc.textContent = 'Prueba con otro término de búsqueda o registra una nueva ficha.';
+      }
     } else {
       emptyState.classList.add('hidden');
 
@@ -397,16 +409,25 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Modal Alta de Paciente
-  btnOpenRegisterModal.addEventListener('click', () => {
+  function openRegisterModal(prefilledCode = null) {
     modalErrorMessage.classList.add('hidden');
     formNewPatient.reset();
     inputInitialPain.value = 5;
     updatePainSliderBadge(5);
-    inputPatientCode.value = window.db.generateUniqueCode();
+    inputPatientCode.value = prefilledCode || window.db.generateUniqueCode();
     modalNewPatient.classList.remove('hidden');
     modalNewPatient.classList.add('flex');
     inputPatientCondition.focus();
-  });
+  }
+
+  btnOpenRegisterModal.addEventListener('click', () => openRegisterModal());
+
+  const btnEmptyRegister = document.getElementById('btn-empty-register-code');
+  if (btnEmptyRegister) {
+    btnEmptyRegister.addEventListener('click', () => {
+      openRegisterModal(state.searchQuery.trim().toUpperCase());
+    });
+  }
 
   function closeRegisterModal() {
     modalNewPatient.classList.add('hidden');

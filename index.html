@@ -204,10 +204,16 @@
       </section>
 
       <!-- Estado vacío -->
-      <div id="empty-state" class="hidden text-center py-12 px-4 bg-surface-container-lowest rounded-xl border border-dashed border-outline-variant/60">
-        <span class="material-symbols-outlined text-4xl text-outline mb-2">person_search</span>
+      <div id="empty-state" class="hidden text-center py-10 px-4 bg-surface-container-lowest rounded-xl border border-dashed border-outline-variant/60 space-y-3">
+        <span class="material-symbols-outlined text-4xl text-outline mb-1">person_search</span>
         <h4 class="text-base font-semibold text-on-surface">No se encontraron pacientes</h4>
-        <p class="text-xs text-on-surface-variant mt-1">Prueba con otro término de búsqueda o registra una nueva ficha.</p>
+        <p id="empty-state-desc" class="text-xs text-on-surface-variant">Prueba con otro término de búsqueda o registra una nueva ficha.</p>
+        <div id="empty-state-action" class="pt-1 hidden">
+          <button id="btn-empty-register-code" type="button" class="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-container text-white text-xs font-bold rounded-lg shadow-sm hover:bg-primary active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[16px]">person_add</span>
+            <span id="btn-empty-register-text">+ Registrar ficha</span>
+          </button>
+        </div>
       </div>
 
       <!-- Botón Registrar Nuevo Paciente -->
