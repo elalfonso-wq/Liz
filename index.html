@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html class="h-full bg-background" lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+  <title>FisioConecta - Seguimiento Clínico de Pacientes</title>
+
+  <!-- Google Fonts: Manrope & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  
+  <!-- Material Symbols Outlined -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"/>
+
+  <!-- Tailwind Script -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Tailwind Config con tokens exactos del diseño -->
+  <script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "surface-bright": "#f0fcfa",
+            "outline": "#6e7a75",
+            "outline-variant": "#bdc9c4",
+            "secondary-container": "#b7eadc",
+            "on-error": "#ffffff",
+            "background": "#f0fcfa",
+            "error": "#ba1a1a",
+            "secondary": "#37675c",
+            "surface-container-high": "#deebe9",
+            "primary": "#005f50",
+            "primary-container": "#0d7a68",
+            "primary-fixed-dim": "#7cd7c1",
+            "on-surface-variant": "#3e4946",
+            "surface-container-low": "#eaf6f4",
+            "surface-dim": "#d0dddb",
+            "on-primary-container": "#aaffe9",
+            "on-surface": "#131e1d",
+            "surface-container-highest": "#d9e5e3",
+            "surface-container-lowest": "#ffffff",
+            "surface": "#f0fcfa",
+            "surface-variant": "#d9e5e3",
+            "surface-container": "#e4f0ee",
+            "surface-tint": "#006b5b"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          fontFamily: {
+            "body-md": ["Manrope", "sans-serif"],
+            "title-sm": ["Manrope", "sans-serif"],
+            "headline-md": ["Manrope", "sans-serif"],
+            "label-sm": ["Manrope", "sans-serif"],
+            "label-code": ["JetBrains Mono", "monospace"],
+            "metric-num": ["JetBrains Mono", "monospace"]
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      min-height: max(884px, 100dvh);
+      font-family: 'Manrope', sans-serif;
+    }
+    .font-mono-code {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Estilo para iconos con relleno */
+    .icon-fill {
+      font-variation-settings: 'FILL' 1;
+    }
+    /* Ocultar barra de desplazamiento */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-background antialiased min-h-screen flex flex-col justify-between selection:bg-secondary-container selection:text-primary">
+
+  <!-- Contenedor móvil y tablet centrado -->
+  <div class="w-full max-w-screen-md mx-auto min-h-screen flex flex-col relative pb-28">
+
+    <!-- CABECERA PRINCIPAL (TopAppBar) -->
+    <header class="bg-surface-container-lowest flex justify-between items-center w-full px-4 py-3 h-14 sticky top-0 z-40 border-b border-outline-variant/30">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-[26px]">clinical_notes</span>
+        <span class="text-xl font-bold text-primary tracking-tight">FisioConecta</span>
+        <div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded-full border border-outline-variant/40 ml-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+          <span class="text-xs text-primary font-semibold">Modo Clínico</span>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-1">
+        <button id="btn-quick-search-toggle" aria-label="Buscar" class="w-9 h-9 flex items-center justify-center rounded-lg text-primary hover:bg-surface-container-low active:scale-95 transition-all">
+          <span class="material-symbols-outlined text-[22px]">search</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- TOAST DE NOTIFICACIÓN FLOTANTE -->
+    <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none w-11/12 max-w-sm">
+      <div id="toast-body" class="bg-primary text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 border border-primary-container">
+        <span id="toast-icon" class="material-symbols-outlined text-[22px]">check_circle</span>
+        <span id="toast-message" class="text-sm font-medium">Operación realizada con éxito</span>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PANTALLA 1: DIRECTORIO DE PACIENTES (ACTIVA) -->
+    <!-- ========================================== -->
+    <main id="view-pacientes" class="flex-1 px-4 pt-4 space-y-4">
+
+      <!-- Barra de métricas rápidas -->
+      <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/30 flex items-center justify-between shadow-[0_2px_8px_rgba(13,122,104,0.04)]">
+        <div>
+          <span class="text-xs text-on-surface-variant block">Pacientes en Seguimiento</span>
+          <div class="flex items-baseline gap-2 mt-0.5">
+            <span id="stat-total-pacientes" class="font-mono-code text-2xl font-bold text-primary">0</span>
+            <span id="stat-subtext" class="text-xs text-secondary font-medium">Activos en el sistema</span>
+          </div>
+        </div>
+        <div id="stat-avatar-strip" class="flex -space-x-1.5 items-center">
+          <!-- Avatares con código dinámico -->
+        </div>
+      </section>
+
+      <!-- Barra de búsqueda rápida -->
+      <section class="relative">
+        <label class="block text-xs font-medium text-on-surface-variant mb-1" for="search-input">Buscar Expediente Anónimo</label>
+        <div class="relative flex items-center">
+          <span class="material-symbols-outlined absolute left-3.5 text-outline text-[20px] pointer-events-none">search</span>
+          <input 
+            type="search" 
+            id="search-input" 
+            placeholder="Buscar por código (ej. 842) o por zona..." 
+            class="w-full bg-surface-container-lowest border border-outline-variant/60 rounded-xl pl-10 pr-10 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none transition-all"
+          />
+          <button id="btn-clear-search" class="hidden absolute right-3 text-outline hover:text-on-surface">
+            <span class="material-symbols-outlined text-[18px]">cancel</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Barra de filtros rápidos por dolor (Escala VAS) -->
+      <section class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-on-surface-variant font-medium">Filtro por Escala de Dolor (VAS)</span>
+          <span id="filter-count-badge" class="text-xs text-secondary font-medium">0 registros</span>
+        </div>
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <!-- Filtro Todos -->
+          <button data-filter="all" class="btn-filter flex-shrink-0 px-3.5 py-1.5 rounded-full bg-primary-container text-white text-xs font-semibold active:scale-95 transition-all flex items-center gap-1.5 shadow-sm">
+            <span>Todos</span>
+            <span id="count-all" class="bg-primary/50 text-white rounded-full px-1.5 text-[10px] py-0.5">0</span>
+          </button>
+          <!-- Filtro Leve -->
+          <button data-filter="mild" class="btn-filter flex-shrink-0 px-3.5 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface hover:bg-surface-container-low text-xs font-medium active:scale-95 transition-all flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
+            <span>Dolor Leve (0-3)</span>
+          </button>
+          <!-- Filtro Moderado -->
+          <button data-filter="moderate" class="btn-filter flex-shrink-0 px-3.5 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface hover:bg-surface-container-low text-xs font-medium active:scale-95 transition-all flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#F59E0B]"></span>
+            <span>Dolor Moderado (4-6)</span>
+          </button>
+          <!-- Filtro Intenso -->
+          <button data-filter="severe" class="btn-filter flex-shrink-0 px-3.5 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface hover:bg-surface-container-low text-xs font-medium active:scale-95 transition-all flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#EF4444]"></span>
+            <span>Dolor Intenso (7-10)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Lista dinámica de tarjetas de pacientes -->
+      <section id="patient-list-container" class="space-y-3 pt-1">
+        <!-- Renderizado dinámico desde app.js -->
+      </section>
+
+      <!-- Estado vacío (cuando no hay resultados) -->
+      <div id="empty-state" class="hidden text-center py-12 px-4 bg-surface-container-lowest rounded-xl border border-dashed border-outline-variant/60">
+        <span class="material-symbols-outlined text-4xl text-outline mb-2">person_search</span>
+        <h4 class="text-base font-semibold text-on-surface">No se encontraron pacientes</h4>
+        <p class="text-xs text-on-surface-variant mt-1">Prueba con otro término de búsqueda o registra una nueva ficha.</p>
+      </div>
+
+      <!-- Botón ergonómico principal: Registrar Nuevo Paciente -->
+      <div class="pt-3 sticky bottom-20 z-30">
+        <button id="btn-open-register-modal" class="w-full h-12 bg-primary-container text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(13,122,104,0.25)] hover:bg-primary active:scale-[0.98] transition-all">
+          <span class="material-symbols-outlined text-[22px]">person_add</span>
+          <span>+ Registrar Nuevo Paciente</span>
+        </button>
+      </div>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- MODAL: REGISTRAR NUEVO PACIENTE           -->
+    <!-- ========================================== -->
+    <div id="modal-new-patient" class="fixed inset-0 z-50 bg-[#1E2928]/50 backdrop-blur-sm hidden items-center justify-center p-4">
+      <div class="bg-surface-container-lowest rounded-2xl max-w-sm w-full p-5 shadow-[0_16px_32px_-8px_rgba(13,122,104,0.25)] border border-outline-variant/30 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+        
+        <!-- Cabecera del Modal -->
+        <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[24px]">badge</span>
+            <h4 class="text-lg font-bold text-on-surface">Alta Rápida de Paciente</h4>
+          </div>
+          <button id="btn-close-modal" class="text-outline hover:text-on-surface p-1 rounded-lg">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <p class="text-xs text-on-surface-variant leading-relaxed">
+          Ficha 100% anónima. Protege la privacidad clínica del paciente mediante códigos ficticios.
+        </p>
+
+        <!-- Formulario -->
+        <form id="form-new-patient" class="space-y-3.5">
+          <!-- Código del Paciente -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-on-surface-variant" for="input-patient-code">
+                Código Anónimo
+              </label>
+              <button type="button" id="btn-regenerate-code" class="text-[11px] text-primary hover:underline flex items-center gap-0.5">
+                <span class="material-symbols-outlined text-[13px]">refresh</span>
+                Generar otro
+              </button>
+            </div>
+            <div class="relative">
+              <input 
+                type="text" 
+                id="input-patient-code" 
+                required 
+                maxlength="15" 
+                placeholder="PAC-000"
+                class="font-mono-code font-bold w-full bg-surface-container-low border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-primary focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none"
+              />
+            </div>
+            <span class="text-[10px] text-outline mt-0.5 block">Código único para identificar al paciente en consulta.</span>
+          </div>
+
+          <!-- Diagnóstico / Condición -->
+          <div>
+            <label class="block text-xs font-semibold text-on-surface-variant mb-1" for="input-patient-condition">
+              Diagnóstico / Motivo de Consulta <span class="text-error">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="input-patient-condition" 
+              required 
+              placeholder="Ej. Tendinopatía rotuliana, Lumbalgia..." 
+              class="w-full bg-surface-container-lowest border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none"
+            />
+          </div>
+
+          <!-- Región Anatómica -->
+          <div>
+            <label class="block text-xs font-semibold text-on-surface-variant mb-1" for="input-patient-zone">
+              Zona Corporal Afectada
+            </label>
+            <input 
+              type="text" 
+              id="input-patient-zone" 
+              placeholder="Ej. Rodilla derecha, Hombro izquierdo..." 
+              class="w-full bg-surface-container-lowest border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none"
+            />
+          </div>
+
+          <!-- Dolor Inicial de Referencia -->
+          <div>
+            <label class="block text-xs font-semibold text-on-surface-variant mb-1">
+              Dolor inicial estimado (0 a 10)
+            </label>
+            <div class="flex items-center gap-3 bg-surface-container-low p-2 rounded-lg border border-outline-variant/30">
+              <input 
+                type="range" 
+                id="input-initial-pain" 
+                min="0" 
+                max="10" 
+                value="5" 
+                class="w-full accent-primary cursor-pointer"
+              />
+              <span id="initial-pain-badge" class="font-mono-code text-xs font-bold px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#B45309] border border-[#FCD34D] min-w-[50px] text-center">
+                5/10
+              </span>
+            </div>
+          </div>
+
+          <!-- Mensaje de error si código duplicado -->
+          <div id="modal-error-message" class="hidden text-xs text-error bg-error-container/40 p-2 rounded-lg border border-error/20 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px]">error</span>
+            <span id="modal-error-text">Este código ya existe.</span>
+          </div>
+
+          <!-- Botones de Acción -->
+          <div class="flex gap-2 pt-2">
+            <button 
+              type="button" 
+              id="btn-cancel-modal" 
+              class="flex-1 h-11 border border-outline text-on-surface hover:bg-surface-container-low text-xs font-semibold rounded-lg active:scale-95 transition-all"
+            >
+              Cancelar
+            </button>
+            <button 
+              type="submit" 
+              id="btn-confirm-modal" 
+              class="flex-1 h-11 bg-primary-container text-white text-xs font-bold rounded-lg hover:bg-primary active:scale-95 transition-all shadow-sm flex items-center justify-center gap-1"
+            >
+              <span class="material-symbols-outlined text-[18px]">check</span>
+              <span>Guardar Ficha</span>
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL DE ACCIONES DE PACIENTE SELECCIONADO -->
+    <!-- ========================================== -->
+    <div id="modal-patient-actions" class="fixed inset-0 z-50 bg-[#1E2928]/40 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
+      <div class="bg-surface-container-lowest rounded-t-2xl sm:rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-outline-variant/30 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span id="action-patient-code" class="font-mono-code font-bold text-sm bg-surface-container text-primary px-2.5 py-1 rounded-md border border-secondary-container">
+              PAC-000
+            </span>
+            <span class="text-xs text-secondary font-medium">Expediente Clínico</span>
+          </div>
+          <button id="btn-close-action-modal" class="text-outline hover:text-on-surface p-1">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <div>
+          <h4 id="action-patient-condition" class="text-base font-bold text-on-surface">Condición</h4>
+          <p id="action-patient-zone" class="text-xs text-on-surface-variant mt-0.5">Zona</p>
+        </div>
+
+        <div class="space-y-2 pt-1">
+          <!-- Botón Registrar Sesión -->
+          <button id="btn-action-new-session" class="w-full h-11 bg-primary-container text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary active:scale-95 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">edit_calendar</span>
+            <span>Registrar Nueva Sesión</span>
+          </button>
+
+          <!-- Botón Ver Evolución -->
+          <button id="btn-action-view-evolution" class="w-full h-11 bg-surface-container-low border border-outline-variant/40 text-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-surface-container active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[18px]">monitoring</span>
+            <span>Ver Evolución y Gráfica</span>
+          </button>
+
+          <!-- Botón Eliminar Ficha -->
+          <button id="btn-action-delete" class="w-full h-9 text-error text-xs font-semibold rounded-lg flex items-center justify-center gap-1 hover:bg-red-50 active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[16px]">delete</span>
+            <span>Eliminar Ficha</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- BARRA DE NAVEGACIÓN INFERIOR (BottomNav)   -->
+    <!-- ========================================== -->
+    <nav class="fixed bottom-0 left-0 w-full z-40 flex justify-around items-center px-4 py-2 h-16 max-w-screen-md mx-auto bg-surface-container-lowest shadow-[0_-4px_16px_rgba(13,122,104,0.06)] border-t border-outline-variant/30">
+      
+      <!-- Pestaña 1: Pacientes (ACTIVA) -->
+      <button id="tab-nav-pacientes" class="flex flex-col items-center justify-center text-primary bg-secondary-container/40 rounded-xl px-4 py-1.5 transition-all active:scale-95">
+        <span class="material-symbols-outlined text-[22px] icon-fill">group</span>
+        <span class="text-[11px] font-bold tracking-tight">Pacientes</span>
+      </button>
+
+      <!-- Pestaña 2: Nueva Sesión (Próxima Función) -->
+      <button id="tab-nav-sesion" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-4 py-1.5 transition-colors active:scale-95">
+        <span class="material-symbols-outlined text-[22px]">edit_calendar</span>
+        <span class="text-[11px] font-medium">Nueva Sesión</span>
+      </button>
+
+      <!-- Pestaña 3: Evolución (Próxima Función) -->
+      <button id="tab-nav-evolucion" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-4 py-1.5 transition-colors active:scale-95">
+        <span class="material-symbols-outlined text-[22px]">monitoring</span>
+        <span class="text-[11px] font-medium">Evolución</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- Scripts de la aplicación -->
+  <script src="js/db.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

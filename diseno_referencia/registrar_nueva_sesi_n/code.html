@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-surface" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Registrar Nueva Sesión - FisioConecta</title>
+<!-- Google Fonts: Manrope & JetBrains Mono -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-bright": "#f0fcfa",
+            "on-primary-fixed-variant": "#005144",
+            "outline": "#6e7a75",
+            "outline-variant": "#bdc9c4",
+            "secondary-container": "#b7eadc",
+            "on-error": "#ffffff",
+            "on-secondary-fixed-variant": "#1d4f45",
+            "background": "#f0fcfa",
+            "error": "#ba1a1a",
+            "secondary": "#37675c",
+            "secondary-fixed": "#baeddf",
+            "surface-container-high": "#deebe9",
+            "primary": "#005f50",
+            "primary-container": "#0d7a68",
+            "primary-fixed-dim": "#7cd7c1",
+            "tertiary-container": "#ac523a",
+            "on-surface-variant": "#3e4946",
+            "on-tertiary": "#ffffff",
+            "inverse-surface": "#273331",
+            "on-tertiary-fixed-variant": "#7c2e19",
+            "surface-container-low": "#eaf6f4",
+            "surface-dim": "#d0dddb",
+            "on-tertiary-fixed": "#3c0800",
+            "on-primary-container": "#aaffe9",
+            "on-tertiary-container": "#ffebe6",
+            "tertiary": "#8d3b24",
+            "tertiary-fixed-dim": "#ffb4a1",
+            "secondary-fixed-dim": "#9ed1c3",
+            "on-surface": "#131e1d",
+            "on-primary-fixed": "#00201a",
+            "tertiary-fixed": "#ffdbd2",
+            "primary-fixed": "#99f3dd",
+            "on-secondary-container": "#3b6b60",
+            "on-primary": "#ffffff",
+            "on-background": "#131e1d",
+            "inverse-on-surface": "#e7f3f1",
+            "surface-container-highest": "#d9e5e3",
+            "error-container": "#ffdad6",
+            "surface-container-lowest": "#ffffff",
+            "surface": "#f0fcfa",
+            "inverse-primary": "#7cd7c1",
+            "on-secondary-fixed": "#00201a",
+            "surface-variant": "#d9e5e3",
+            "surface-container": "#e4f0ee",
+            "on-error-container": "#93000a",
+            "on-secondary": "#ffffff",
+            "surface-tint": "#006b5b"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "1rem",
+            "space-sm": "0.5rem",
+            "gutter-tablet": "1.5rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "space-xs": "0.25rem",
+            "margin-tablet": "2rem",
+            "gutter": "1rem"
+          },
+          "fontFamily": {
+            "body-md": ["Manrope"],
+            "display-lg": ["Manrope"],
+            "title-sm": ["Manrope"],
+            "headline-md": ["Manrope"],
+            "label-sm": ["Manrope"],
+            "label-code": ["JetBrains Mono"],
+            "body-lg": ["Manrope"],
+            "headline-lg-mobile": ["Manrope"],
+            "headline-lg": ["Manrope"],
+            "metric-num": ["JetBrains Mono"]
+          },
+          "fontSize": {
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400" }],
+            "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "title-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "label-code": ["14px", { "lineHeight": "20px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "metric-num": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 22px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-smoothing: antialiased;
+      vertical-align: middle;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full bg-surface text-on-surface font-body-md text-body-md antialiased selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- Shell Mobile Frame Canvas -->
+<div class="min-h-full max-w-screen-md mx-auto flex flex-col bg-surface pb-36 relative">
+<!-- Top Bar Component (Task Focused Form Header with Cancel) -->
+<header class="bg-surface-container-lowest text-primary flex justify-between items-center w-full px-space-md py-space-sm h-14 sticky top-0 z-40 shadow-sm border-b border-outline-variant/30">
+<button aria-label="Cancelar registro" class="flex items-center gap-1.5 text-on-surface-variant hover:text-primary active:scale-[0.98] transition-all py-1.5 px-2 rounded-lg -ml-2" type="button">
+<span class="material-symbols-outlined text-outline">close</span>
+<span class="font-title-sm text-title-sm font-semibold">Cancelar</span>
+</button>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">clinical_notes</span>
+<h1 class="font-headline-md text-headline-md font-bold text-primary tracking-tight">FisioConecta</h1>
+</div>
+<div class="flex items-center justify-end w-16">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary-container/50 text-secondary font-label-sm text-label-sm font-semibold">
+          Fase 2
+        </span>
+</div>
+</header>
+<!-- Patient Context & Session Metadata Banner -->
+<div class="px-space-md pt-space-md pb-space-sm">
+<div class="bg-surface-container-lowest rounded-xl p-space-md border border-outline-variant/40 shadow-sm">
+<div class="flex items-center justify-between gap-2 mb-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Paciente Asignado</span>
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">calendar_today</span>
+<span class="font-medium" id="currentDateDisplay">24 Octubre 2024</span>
+</div>
+</div>
+<div class="flex items-baseline justify-between flex-wrap gap-2">
+<div class="flex items-center gap-2">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold tracking-tight">Nueva Sesión</h2>
+<span class="font-label-code text-label-code bg-[#E8F3F1] text-primary px-2.5 py-0.5 rounded-full border border-[#C5E2DC] shadow-xs">
+              #PAC-842
+            </span>
+</div>
+<span class="font-label-sm text-label-sm text-secondary font-semibold bg-surface-container-low px-2 py-0.5 rounded-md">
+            Sesión #12 de Rehabilitación
+          </span>
+</div>
+</div>
+</div>
+<!-- Main Content Form Structure -->
+<main class="flex-1 px-space-md flex flex-col gap-space-lg pt-space-xs">
+<!-- SECCIÓN 1: Nivel de Dolor del Paciente (Escala EVA) -->
+<section aria-labelledby="eva-section-title" class="bg-surface-container-lowest rounded-xl p-space-md border border-outline-variant/40 shadow-sm">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">vital_signs</span>
+<h3 class="font-title-sm text-title-sm text-on-surface font-bold" id="eva-section-title">Nivel de Dolor (Escala EVA)</h3>
+</div>
+<span class="font-label-code text-label-code text-secondary font-bold" id="evaBadgeScore">4 / 10</span>
+</div>
+<!-- Selected State Card Display -->
+<div class="bg-surface-container-low/70 rounded-xl p-3.5 mb-space-md border border-outline-variant/30 flex items-center justify-between">
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant mb-0.5">Diagnóstico EVA al inicio</div>
+<div class="font-title-sm text-title-sm font-bold text-amber-700" id="evaStatusText">
+              4 - Dolor Moderado Soportable
+            </div>
+</div>
+<div class="h-10 w-10 rounded-full bg-amber-100 flex items-center justify-center border-2 border-amber-500 shadow-sm" id="evaColorDot">
+<span class="font-metric-num text-metric-num text-amber-900" id="evaNumericCenter">4</span>
+</div>
+</div>
+<!-- 0-10 Segmented Interactive Touch Rail -->
+<div class="mb-2">
+<div aria-label="Escala EVA del 0 al 10" class="flex justify-between items-center gap-1 overflow-x-auto pb-1.5 touch-pan-x" id="evaPillRail" role="radiogroup">
+<!-- 0 to 3 (Mint) -->
+<button aria-checked="false" class="eva-pill flex-1 min-w-[34px] h-12 rounded-lg border-2 border-emerald-500/40 bg-surface text-emerald-800 font-metric-num text-metric-num flex items-center justify-center active:scale-95 transition-all" onclick="selectEva(0)" role="radio" type="button">0</button>
+<button aria-checked="false" class="eva-pill flex-1 min-w-[34px] h-12 rounded-lg border-2 border-emerald-500/40 bg-surface text-emerald-800 font-metric-num text-metric-num flex items-center justify-center active:scale-95 transition-all" onclick="selectEva(1)" role="radio" type="button">1</button>
+<button aria-checked="false" class="eva-pill flex-1 min-w-[34px] h-12 rounded-lg border-2 border-emerald-500/40 bg-surface text-emerald-800 font-metric-num text-metric-num flex items-center justify-center active:scale-95 transition-all" onclick="selectEva(2)" role="radio" type="button">2</button>
+<button aria-checked="false" class="eva-pill flex-1 min-w-[34px] h-12 rounded-lg border-2 border-emerald-500/40 bg-surface text-emerald-800 font-metric-num text-metric-num flex items-center justify-center active:scale-95 transition-all" onclick="selectEva(3)" role="radio" type="button">3</button>
+<!-- 4 to 6 (Amber) -->
+<button aria-checked="true" class="eva-pill active-pill flex-1 min-w-[34px] h-12 rounded-lg border-2 border-amber-500 bg-amber-500 text-white font-metric-num text-metric-num flex items-center justify-center shadow-md active:scale-95 transition-all scale-105" onclick="selectEva(4)" role="radio" type="button">4</button>
+<button aria-checked="false" class="eva-pill flex-1 min-w-[34px] h-12 rounded-lg border-2 border-amber-500/40 bg-surface text-amber-800 font-metric-num text-metric-num flex items-center justify-center active:scale-95 transition-all" onclick="selectEva(5)" role="radio" type="button">5</button>
+<button aria-checked="false" class="eva-pill flex-1 min-w-[34px] h-12 rounded-lg border-2 border-amber-500/40 bg-surface text-amber-800 font-metric-num text-metric-num flex items-center justify-center active:scale-95 transition-all" onclick="selectEva(6)" role="radio" type="button">6</button>
+<!-- 7 to 10 (Red) -->
+<button aria-checked="false" class="eva-pill flex-1 min-w-[34px] h-12 rounded-lg border-2 border-rose-500/40 bg-surface text-rose-800 font-metric-num text-metric-num flex items-center justify-center active:scale-95 transition-all" onclick="selectEva(7)" role="radio" type="button">7</button>
+<button aria-checked="false" class="eva-pill flex-1 min-w-[34px] h-12 rounded-lg border-2 border-rose-500/40 bg-surface text-rose-800 font-metric-num text-metric-num flex items-center justify-center active:scale-95 transition-all" onclick="selectEva(8)" role="radio" type="button">8</button>
+<button aria-checked="false" class="eva-pill flex-1 min-w-[34px] h-12 rounded-lg border-2 border-rose-500/40 bg-surface text-rose-800 font-metric-num text-metric-num flex items-center justify-center active:scale-95 transition-all" onclick="selectEva(9)" role="radio" type="button">9</button>
+<button aria-checked="false" class="eva-pill flex-1 min-w-[34px] h-12 rounded-lg border-2 border-rose-500/40 bg-surface text-rose-800 font-metric-num text-metric-num flex items-center justify-center active:scale-95 transition-all" onclick="selectEva(10)" role="radio" type="button">10</button>
+</div>
+<!-- Semantic textual anchors below rail -->
+<div class="flex justify-between items-center px-1 font-label-sm text-label-sm text-on-surface-variant pt-1 font-medium">
+<span class="text-emerald-700">0 - Sem Dor</span>
+<span class="text-amber-700">5 - Moderada</span>
+<span class="text-rose-700">10 - Insuportável</span>
+</div>
+</div>
+<!-- Historical Session Delta Comparison Card -->
+<div class="mt-3.5 bg-surface-container-high/60 rounded-lg p-2.5 flex items-center justify-between border border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">trending_down</span>
+<div class="font-body-md text-body-md text-on-surface">
+<span class="font-bold">Anterior: 5/10</span>
+<span class="text-secondary font-semibold ml-1">(Disminución de 1 punto)</span>
+</div>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full font-label-sm text-label-sm font-semibold bg-emerald-100 text-emerald-800">
+            Evolución Favorable
+          </span>
+</div>
+</section>
+<!-- SECCIÓN 2: Ejercicios Realizados / Indicados -->
+<section aria-labelledby="exercises-section-title" class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">fitness_center</span>
+<h3 class="font-title-sm text-title-sm text-on-surface font-bold" id="exercises-section-title">Ejercicios en Sesión (3)</h3>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Protocolo Fémoro-Rotuliano</span>
+</div>
+<!-- Exercise 1 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md border border-outline-variant/40 shadow-sm relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-start justify-between gap-3 mb-2">
+<div>
+<span class="inline-flex items-center gap-1 font-label-code text-label-code text-primary font-bold text-xs bg-surface-container-low px-2 py-0.5 rounded mb-1">
+                EX-01 • ISOMÉTRICO
+              </span>
+<h4 class="font-title-sm text-title-sm text-on-surface font-bold">Sentadilla isométrica en pared</h4>
+</div>
+<button aria-label="Editar Sentadilla isométrica" class="text-outline hover:text-primary active:scale-95 p-1 rounded-md" type="button">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-2 mb-2.5">
+<div class="bg-surface-container-low/60 rounded-lg p-2 border border-outline-variant/20">
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Dosis / Repetición</span>
+<span class="font-metric-num text-metric-num text-primary">3 <span class="font-body-md text-body-md text-on-surface font-medium">series x 45s</span></span>
+</div>
+<div class="bg-surface-container-low/60 rounded-lg p-2 border border-outline-variant/20">
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Pausa</span>
+<span class="font-metric-num text-metric-num text-secondary">60 <span class="font-body-md text-body-md text-on-surface font-medium">segundos</span></span>
+</div>
+</div>
+<div class="bg-surface-container-high/40 rounded-lg p-2.5 flex items-start gap-2 border-l-2 border-secondary">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5">info</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+<strong class="text-on-surface font-semibold">Nota clínica:</strong> Sin sobrepasar los 90° de flexión. Mantener alineación de rodilla con segundo dedo del pie.
+            </p>
+</div>
+</div>
+<!-- Exercise 2 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md border border-outline-variant/40 shadow-sm relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-start justify-between gap-3 mb-2">
+<div>
+<span class="inline-flex items-center gap-1 font-label-code text-label-code text-primary font-bold text-xs bg-surface-container-low px-2 py-0.5 rounded mb-1">
+                EX-02 • UNILATERAL
+              </span>
+<h4 class="font-title-sm text-title-sm text-on-surface font-bold">Puente de glúteo unipodal</h4>
+</div>
+<button aria-label="Editar Puente de glúteo" class="text-outline hover:text-primary active:scale-95 p-1 rounded-md" type="button">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-2 mb-2.5">
+<div class="bg-surface-container-low/60 rounded-lg p-2 border border-outline-variant/20">
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Dosis / Repetición</span>
+<span class="font-metric-num text-metric-num text-primary">3 <span class="font-body-md text-body-md text-on-surface font-medium">series x 12 reps</span></span>
+</div>
+<div class="bg-surface-container-low/60 rounded-lg p-2 border border-outline-variant/20">
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Modalidad</span>
+<span class="font-body-md text-body-md text-secondary font-bold">Por pierna (D/I)</span>
+</div>
+</div>
+<div class="bg-surface-container-high/40 rounded-lg p-2.5 flex items-start gap-2 border-l-2 border-secondary">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5">info</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+<strong class="text-on-surface font-semibold">Nota clínica:</strong> Énfasis en extensión completa sin arquear zona lumbar. Activación previa de transverso abdominal.
+            </p>
+</div>
+</div>
+<!-- Exercise 3 -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md border border-outline-variant/40 shadow-sm relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-start justify-between gap-3 mb-2">
+<div>
+<span class="inline-flex items-center gap-1 font-label-code text-label-code text-primary font-bold text-xs bg-surface-container-low px-2 py-0.5 rounded mb-1">
+                EX-03 • CONTROL MOTOR
+              </span>
+<h4 class="font-title-sm text-title-sm text-on-surface font-bold">Extensiones excéntricas de cuádriceps</h4>
+</div>
+<button aria-label="Editar Extensiones excéntricas" class="text-outline hover:text-primary active:scale-95 p-1 rounded-md" type="button">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-2 mb-2.5">
+<div class="bg-surface-container-low/60 rounded-lg p-2 border border-outline-variant/20">
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Dosis / Repetición</span>
+<span class="font-metric-num text-metric-num text-primary">3 <span class="font-body-md text-body-md text-on-surface font-medium">series x 10 reps</span></span>
+</div>
+<div class="bg-surface-container-low/60 rounded-lg p-2 border border-outline-variant/20">
+<span class="block font-label-sm text-label-sm text-on-surface-variant">Resistencia</span>
+<span class="font-body-md text-body-md text-secondary font-bold">Carga Ligera (2 kg)</span>
+</div>
+</div>
+<div class="bg-surface-container-high/40 rounded-lg p-2.5 flex items-start gap-2 border-l-2 border-secondary">
+<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5">info</span>
+<p class="font-body-md text-body-md text-on-surface-variant">
+<strong class="text-on-surface font-semibold">Nota clínica:</strong> Fase excéntrica controlada en 4 segundos. Cero crepitación dolorosa.
+            </p>
+</div>
+</div>
+<!-- Botón + Añadir Otro Ejercicio (Acordeón Rápido) -->
+<div class="border-2 border-dashed border-primary/40 bg-surface-container-low/30 rounded-xl p-space-md">
+<button class="w-full flex items-center justify-center gap-2 text-primary font-title-sm text-title-sm font-bold py-2 hover:bg-surface-container-low rounded-lg transition-colors active:scale-[0.99]" id="toggleAddBtn" onclick="toggleAddExerciseForm()" type="button">
+<span class="material-symbols-outlined font-bold">add_circle</span>
+<span>+ Añadir Otro Ejercicio</span>
+</button>
+<!-- Drawer de formulario de carga rápida -->
+<div class="hidden pt-space-md border-t border-outline-variant/40 mt-space-sm flex flex-col gap-3" id="quickAddForm">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant font-medium mb-1" for="exName">Nombre del Ejercicio</label>
+<input class="w-full rounded-lg border border-[#D0DED9] bg-surface-container-lowest px-3 py-2 text-on-surface font-body-md text-body-md focus:border-primary focus:ring-0 focus:outline-none" id="exName" placeholder="Ej. Prensa bipodal con banda elástica" type="text"/>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant font-medium mb-1" for="exSets">Series</label>
+<div class="flex items-center">
+<button class="w-10 h-10 bg-surface-container-high hover:bg-surface-variant text-on-surface font-bold rounded-l-lg flex items-center justify-center border border-r-0 border-[#D0DED9] active:scale-95" onclick="adjustCount('exSets', -1)" type="button">-</button>
+<input class="w-full h-10 text-center font-metric-num text-metric-num bg-surface-container-lowest border-y border-[#D0DED9] focus:outline-none" id="exSets" readonly="" type="text" value="3"/>
+<button class="w-10 h-10 bg-surface-container-high hover:bg-surface-variant text-on-surface font-bold rounded-r-lg flex items-center justify-center border border-l-0 border-[#D0DED9] active:scale-95" onclick="adjustCount('exSets', 1)" type="button">+</button>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant font-medium mb-1" for="exReps">Reps / Tiempo</label>
+<input class="w-full h-10 rounded-lg border border-[#D0DED9] bg-surface-container-lowest px-3 text-on-surface font-body-md text-body-md focus:border-primary focus:ring-0 focus:outline-none" id="exReps" placeholder="Ej. 12 reps ó 45s" type="text" value="12 reps"/>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant font-medium mb-1" for="exNotes">Indicaciones / Técnica</label>
+<input class="w-full rounded-lg border border-[#D0DED9] bg-surface-container-lowest px-3 py-2 text-on-surface font-body-md text-body-md focus:border-primary focus:ring-0 focus:outline-none" id="exNotes" placeholder="Ej. Sin dolor, enfatizar pausa isométrica de 2s" type="text"/>
+</div>
+<div class="flex items-center justify-end gap-2 pt-1">
+<button class="px-3 py-2 text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold rounded-lg" onclick="toggleAddExerciseForm()" type="button">
+                Descartar
+              </button>
+<button class="px-4 py-2 bg-secondary text-on-secondary rounded-lg font-title-sm text-title-sm font-semibold hover:bg-secondary/90 active:scale-95 transition-all" onclick="saveQuickExercise()" type="button">
+                Confirmar Ejercicio
+              </button>
+</div>
+</div>
+</div>
+</section>
+<!-- SECCIÓN 3: Observaciones Breves de la Sesión -->
+<section aria-labelledby="notes-section-title" class="bg-surface-container-lowest rounded-xl p-space-md border border-outline-variant/40 shadow-sm">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">notes</span>
+<h3 class="font-title-sm text-title-sm text-on-surface font-bold" id="notes-section-title">Observaciones Clínicas</h3>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Registro Médico</span>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5 font-medium" for="sessionClinicalNotes">
+            Notas de evolución inmediata y tolerancia tisular
+          </label>
+<textarea class="w-full rounded-lg border border-[#D0DED9] bg-surface-container-lowest p-3 text-on-surface font-body-md text-body-md focus:border-primary focus:ring-0 focus:outline-none transition-all placeholder:text-outline-variant" id="sessionClinicalNotes" placeholder="Escribir notas de la sesión..." rows="3">Buena tolerancia al esfuerzo, sin inflamación residual. Se autoriza progresión de carga en cadena cinética cerrada para la siguiente consulta.</textarea>
+</div>
+<!-- Quick Clinical Tags Pills -->
+<div class="flex items-center gap-1.5 flex-wrap mt-3 pt-2 border-t border-outline-variant/20">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium mr-1">Atajos rápidos:</span>
+<button class="text-xs bg-surface-container-high/60 hover:bg-surface-container-high text-secondary px-2.5 py-1 rounded-full font-medium transition-colors" onclick="appendTag('Sin dolor residual')" type="button">+ Sin dolor residual</button>
+<button class="text-xs bg-surface-container-high/60 hover:bg-surface-container-high text-secondary px-2.5 py-1 rounded-full font-medium transition-colors" onclick="appendTag('Completó series')" type="button">+ Completó series</button>
+<button class="text-xs bg-surface-container-high/60 hover:bg-surface-container-high text-secondary px-2.5 py-1 rounded-full font-medium transition-colors" onclick="appendTag('Crioterapia aplicada')" type="button">+ Crioterapia aplicada</button>
+</div>
+</section>
+<!-- Resumen de Validación y Métricas de Cierre -->
+<div class="p-space-sm bg-surface-container-low rounded-xl border border-outline-variant/30 flex items-center justify-between text-on-surface-variant">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]">check_circle</span>
+<span class="font-label-sm text-label-sm font-semibold text-primary">Sesión lista para guardar y sincronizar</span>
+</div>
+<span class="font-label-code text-label-code text-xs text-outline">v2.4 FISIO</span>
+</div>
+</main>
+<!-- Foco Ergonómico: Sticky Bottom Primary Action Tray (35% Thumb Zone Priority) -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-lowest/95 backdrop-blur-md border-t border-outline-variant/30 px-space-md py-3 shadow-[0_-4px_20px_rgba(13,122,104,0.08)]">
+<div class="max-w-screen-md mx-auto flex items-center gap-3">
+<button class="flex-1 h-12 bg-primary-container hover:bg-primary text-white font-title-sm text-title-sm font-bold rounded-lg shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2" onclick="triggerSaveSession()" type="button">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">save</span>
+<span>Guardar Sesión Clínica</span>
+</button>
+</div>
+</div>
+<!-- Notification Toast / Micro-interaction Modal -->
+<div class="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-inverse-surface text-inverse-on-surface px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 font-body-md text-body-md transition-all duration-300 opacity-0 pointer-events-none translate-y-2" id="saveToast">
+<span class="material-symbols-outlined text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+<span>Sesión #PAC-842 guardada con éxito</span>
+</div>
+</div>
+<!-- Inline Ergonomic Micro-interactions Logic -->
+<script>
+    // EVA Scale Configuration and Logic
+    const evaDescriptions = {
+      0: "0 - Sin Dolor",
+      1: "1 - Dolor Mínimo Casi Imperceptible",
+      2: "2 - Dolor Leve Tolerable",
+      3: "3 - Dolor Ligero Notorio",
+      4: "4 - Dolor Moderado Soportable",
+      5: "5 - Dolor Moderado Interfiriendo en Actividad",
+      6: "6 - Dolor Moderado Severo",
+      7: "7 - Dolor Intenso Severo",
+      8: "8 - Dolor Muy Intenso Incapacitante",
+      9: "9 - Dolor Extremadamente Agudo",
+      10: "10 - Dolor Insuportable Máximo"
+    };
+
+    let currentEva = 4;
+
+    function selectEva(score) {
+      currentEva = score;
+      const pills = document.querySelectorAll('.eva-pill');
+      
+      pills.forEach((pill, idx) => {
+        pill.setAttribute('aria-checked', idx === score ? 'true' : 'false');
+        // Reset base classes
+        pill.classList.remove('active-pill', 'shadow-md', 'scale-105', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500', 'text-white');
+        
+        if (idx === score) {
+          pill.classList.add('active-pill', 'shadow-md', 'scale-105', 'text-white');
+          if (score <= 3) {
+            pill.classList.add('bg-emerald-600', 'border-emerald-600');
+          } else if (score <= 6) {
+            pill.classList.add('bg-amber-500', 'border-amber-500');
+          } else {
+            pill.classList.add('bg-rose-600', 'border-rose-600');
+          }
+        }
+      });
+
+      // Update Header Text and Badge
+      const statusText = document.getElementById('evaStatusText');
+      const badgeScore = document.getElementById('evaBadgeScore');
+      const numericCenter = document.getElementById('evaNumericCenter');
+      const colorDot = document.getElementById('evaColorDot');
+
+      statusText.textContent = evaDescriptions[score];
+      badgeScore.textContent = `${score} / 10`;
+      numericCenter.textContent = score;
+
+      // Color tint adjustments for the dot container
+      colorDot.className = "h-10 w-10 rounded-full flex items-center justify-center border-2 shadow-sm transition-colors ";
+      if (score <= 3) {
+        colorDot.classList.add('bg-emerald-100', 'border-emerald-500', 'text-emerald-900');
+        statusText.className = "font-title-sm text-title-sm font-bold text-emerald-800";
+      } else if (score <= 6) {
+        colorDot.classList.add('bg-amber-100', 'border-amber-500', 'text-amber-900');
+        statusText.className = "font-title-sm text-title-sm font-bold text-amber-800";
+      } else {
+        colorDot.classList.add('bg-rose-100', 'border-rose-500', 'text-rose-900');
+        statusText.className = "font-title-sm text-title-sm font-bold text-rose-800";
+      }
+    }
+
+    // Toggle Quick Add Exercise Accordion
+    function toggleAddExerciseForm() {
+      const form = document.getElementById('quickAddForm');
+      form.classList.toggle('hidden');
+      if (!form.classList.contains('hidden')) {
+        document.getElementById('exName').focus();
+      }
+    }
+
+    // Adjust numeric count stepper
+    function adjustCount(elementId, delta) {
+      const el = document.getElementById(elementId);
+      let val = parseInt(el.value, 10) || 1;
+      val = Math.max(1, Math.min(20, val + delta));
+      el.value = val;
+    }
+
+    // Append quick tag to clinical notes textarea
+    function appendTag(text) {
+      const notes = document.getElementById('sessionClinicalNotes');
+      if (notes.value.trim().length > 0) {
+        notes.value += ` • ${text}`;
+      } else {
+        notes.value = text;
+      }
+      notes.focus();
+    }
+
+    // Save and toast trigger feedback
+    function triggerSaveSession() {
+      const toast = document.getElementById('saveToast');
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-2');
+      }, 3000);
+    }
+
+    function saveQuickExercise() {
+      const name = document.getElementById('exName').value;
+      if (name.trim()) {
+        toggleAddExerciseForm();
+        triggerSaveSession();
+      }
+    }
+
+    // Set today's date automatically in Spanish
+    document.addEventListener('DOMContentLoaded', () => {
+      const options = { day: 'numeric', month: 'long', year: 'numeric' };
+      const today = new Date().toLocaleDateString('es-ES', options);
+      const dateEl = document.getElementById('currentDateDisplay');
+      if (dateEl && today) {
+        dateEl.textContent = today;
+      }
+    });
+  </script>
+</body></html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FisioConecta - Ficha de Paciente #PAC-842</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-bright": "#f0fcfa",
+            "on-primary-fixed-variant": "#005144",
+            "outline": "#6e7a75",
+            "outline-variant": "#bdc9c4",
+            "secondary-container": "#b7eadc",
+            "on-error": "#ffffff",
+            "on-secondary-fixed-variant": "#1d4f45",
+            "background": "#f0fcfa",
+            "error": "#ba1a1a",
+            "secondary": "#37675c",
+            "secondary-fixed": "#baeddf",
+            "surface-container-high": "#deebe9",
+            "primary": "#005f50",
+            "primary-container": "#0d7a68",
+            "primary-fixed-dim": "#7cd7c1",
+            "tertiary-container": "#ac523a",
+            "on-surface-variant": "#3e4946",
+            "on-tertiary": "#ffffff",
+            "inverse-surface": "#273331",
+            "on-tertiary-fixed-variant": "#7c2e19",
+            "surface-container-low": "#eaf6f4",
+            "surface-dim": "#d0dddb",
+            "on-tertiary-fixed": "#3c0800",
+            "on-primary-container": "#aaffe9",
+            "on-tertiary-container": "#ffebe6",
+            "tertiary": "#8d3b24",
+            "tertiary-fixed-dim": "#ffb4a1",
+            "secondary-fixed-dim": "#9ed1c3",
+            "on-surface": "#131e1d",
+            "on-primary-fixed": "#00201a",
+            "tertiary-fixed": "#ffdbd2",
+            "primary-fixed": "#99f3dd",
+            "on-secondary-container": "#3b6b60",
+            "on-primary": "#ffffff",
+            "on-background": "#131e1d",
+            "inverse-on-surface": "#e7f3f1",
+            "surface-container-highest": "#d9e5e3",
+            "error-container": "#ffdad6",
+            "surface-container-lowest": "#ffffff",
+            "surface": "#f0fcfa",
+            "inverse-primary": "#7cd7c1",
+            "on-secondary-fixed": "#00201a",
+            "surface-variant": "#d9e5e3",
+            "surface-container": "#e4f0ee",
+            "on-error-container": "#93000a",
+            "on-secondary": "#ffffff",
+            "surface-tint": "#006b5b"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "1rem",
+            "space-sm": "0.5rem",
+            "gutter-tablet": "1.5rem",
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "space-xs": "0.25rem",
+            "margin-tablet": "2rem",
+            "gutter": "1rem"
+          },
+          "fontFamily": {
+            "body-md": ["Manrope"],
+            "display-lg": ["Manrope"],
+            "title-sm": ["Manrope"],
+            "headline-md": ["Manrope"],
+            "label-sm": ["Manrope"],
+            "label-code": ["JetBrains Mono"],
+            "body-lg": ["Manrope"],
+            "headline-lg-mobile": ["Manrope"],
+            "headline-lg": ["Manrope"],
+            "metric-num": ["JetBrains Mono"]
+          },
+          "fontSize": {
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400" }],
+            "display-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "title-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "label-code": ["14px", { "lineHeight": "20px", "letterSpacing": "0.06em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400" }],
+            "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "metric-num": ["20px", { "lineHeight": "24px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased min-h-full flex flex-col font-body-md text-body-md pb-24">
+<!-- TOP APP BAR -->
+<header class="bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant/30 dark:border-outline/20 shadow-none flex justify-between items-center w-full px-space-md py-space-sm h-14 max-w-screen-md mx-auto sticky top-0 z-40">
+<div class="flex items-center gap-2">
+<button aria-label="Volver a lista de pacientes" class="w-10 h-10 -ml-1 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low active:scale-[0.98] transition-all" type="button">
+<span class="material-symbols-outlined text-primary" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="clinical_notes">clinical_notes</span>
+<span class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed">FisioConecta</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button aria-label="Buscar" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low active:scale-[0.98] transition-all" type="button">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button aria-label="Compartir reporte" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-low active:scale-[0.98] transition-all" type="button">
+<span class="material-symbols-outlined" data-icon="ios_share">ios_share</span>
+</button>
+</div>
+</header>
+<!-- MAIN PATIENT VIEW CANVAS -->
+<main class="w-full max-w-screen-md mx-auto px-space-md pt-4 space-y-4">
+<!-- PATIENT IDENTIFIER & PRIVACY HEADER CARD -->
+<section class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-space-md shadow-sm">
+<div class="flex items-start justify-between gap-2">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-label-code font-label-code bg-surface-container text-primary px-3 py-1 rounded-full border border-secondary-container text-title-sm">
+              #PAC-842
+            </span>
+<span class="inline-flex items-center gap-1 text-label-sm font-label-sm text-primary bg-surface-bright border border-secondary-container px-2.5 py-0.5 rounded-full font-medium">
+<span class="material-symbols-outlined text-xs" data-icon="shield">shield</span>
+              Privacidad garantizada
+            </span>
+</div>
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile text-on-surface mt-2.5">
+            Tendinopatía rotuliana
+          </h1>
+<p class="text-body-md font-body-md text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="accessibility_new">accessibility_new</span>
+            Rodilla derecha • Miembro inferior
+          </p>
+</div>
+<div class="w-11 h-11 rounded-full bg-surface-container-low flex items-center justify-center text-primary flex-shrink-0">
+<span class="material-symbols-outlined text-2xl" data-icon="folder_shared">folder_shared</span>
+</div>
+</div>
+<!-- Quick Clinical Metadata Strip -->
+<div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-outline-variant/20">
+<div class="flex items-center gap-2 bg-surface-bright p-2 rounded-lg border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="calendar_month">calendar_month</span>
+<div>
+<div class="text-label-sm font-label-sm text-outline">Inicio tratamiento</div>
+<div class="text-body-md font-body-md font-semibold text-on-surface">12 Mar 2025</div>
+</div>
+</div>
+<div class="flex items-center gap-2 bg-surface-bright p-2 rounded-lg border border-outline-variant/20">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="counter_5">counter_5</span>
+<div>
+<div class="text-label-sm font-label-sm text-outline">Sesiones hechas</div>
+<div class="text-body-md font-body-md font-semibold text-on-surface">5 completadas</div>
+</div>
+</div>
+</div>
+</section>
+<!-- PAIN EVOLUTION COMPARISON HERO (Bento Card) -->
+<section class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-space-md shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary" data-icon="trending_down">trending_down</span>
+<h2 class="text-title-sm font-title-sm text-on-surface">Evolución de Dolor (EVA)</h2>
+</div>
+<span class="text-label-sm font-label-sm bg-surface-container-low text-primary px-2 py-0.5 rounded-full font-semibold">
+          -5 pts mejora
+        </span>
+</div>
+<!-- Delta comparison blocks -->
+<div class="grid grid-cols-2 gap-3 items-stretch relative">
+<!-- Initial Pain -->
+<div class="bg-surface-bright border border-outline-variant/30 rounded-lg p-3 flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-on-surface-variant">Dolor inicial</span>
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary"></span>
+</div>
+<div class="my-2 flex items-baseline gap-1">
+<span class="text-metric-num font-metric-num text-3xl text-tertiary">8</span>
+<span class="text-label-sm font-label-sm text-outline">/ 10</span>
+</div>
+<div class="text-label-sm font-label-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-outline" data-icon="history">history</span>
+            Hace 3 semanas
+          </div>
+</div>
+<!-- Current Pain -->
+<div class="bg-surface-container-low border border-primary/20 rounded-lg p-3 flex flex-col justify-between relative overflow-hidden">
+<div class="absolute -right-2 -bottom-2 w-14 h-14 bg-secondary-container/40 rounded-full blur-sm pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<span class="text-label-sm font-label-sm text-primary font-medium">Dolor actual</span>
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+</div>
+<div class="my-2 flex items-baseline gap-1">
+<span class="text-metric-num font-metric-num text-3xl text-primary">3</span>
+<span class="text-label-sm font-label-sm text-primary/70">/ 10</span>
+</div>
+<div class="text-label-sm font-label-sm text-primary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle">check_circle</span>
+            Sesión #5 (Hoy)
+          </div>
+</div>
+</div>
+<!-- Recovery Progress Meter -->
+<div class="mt-3.5 pt-3 border-t border-outline-variant/20">
+<div class="flex justify-between items-center text-label-sm font-label-sm mb-1.5">
+<span class="text-on-surface-variant">Índice de alivio terapéutico</span>
+<span class="text-primary font-bold font-label-code">62.5% recuperación</span>
+</div>
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full rounded-full" style="width: 62.5%"></div>
+</div>
+</div>
+</section>
+<!-- INTERACTIVE EVA GRAPHIC TIMELINE -->
+<section class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-space-md shadow-sm">
+<div class="flex items-center justify-between mb-2">
+<div>
+<h2 class="text-title-sm font-title-sm text-on-surface">Curva Escala Visual Analógica</h2>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Trayectoria de dolor en las 5 sesiones</p>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="show_chart">show_chart</span>
+</div>
+<!-- Visual Chart Canvas Representation -->
+<div class="mt-4 relative bg-surface-bright rounded-lg p-3 border border-outline-variant/20">
+<!-- Vertical scale labels & grid lines -->
+<div class="relative h-44 w-full">
+<!-- Horizontal reference lines -->
+<div class="absolute inset-x-0 top-0 border-b border-dashed border-outline-variant/30 flex justify-between text-[10px] text-outline pb-0.5">
+<span>EVA 10 (Insuportável)</span>
+</div>
+<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 border-b border-dashed border-outline-variant/30 flex justify-between text-[10px] text-outline pb-0.5">
+<span>EVA 5 (Moderada)</span>
+</div>
+<div class="absolute inset-x-0 bottom-0 border-b border-outline-variant/50 flex justify-between text-[10px] text-outline pb-0.5">
+<span>EVA 0 (Sem Dor)</span>
+</div>
+<!-- SVG Trend Line and Markers -->
+<svg class="absolute inset-0 w-full h-full overflow-visible pointer-events-none" preserveaspectratio="none" viewbox="0 0 100 100">
+<!-- Shaded gradient under curve -->
+<defs>
+<lineargradient id="painGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#0D7A68" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#0D7A68" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Area polygon -->
+<polygon fill="url(#painGradient)" points="5,20 27.5,30 50,50 72.5,60 95,70 95,100 5,100"></polygon>
+<!-- Line path connecting points: (5,20), (27.5,30), (50,50), (72.5,60), (95,70) -->
+<polyline fill="none" points="5,20 27.5,30 50,50 72.5,60 95,70" stroke="#005F50" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></polyline>
+</svg>
+<!-- Interactive Node Anchors (Flex spread 5 items) -->
+<div class="absolute inset-0 flex justify-between items-stretch">
+<!-- Point 1 -->
+<div class="flex flex-col items-center justify-end relative w-1/5 group">
+<div class="absolute top-[20%] -translate-y-1/2 flex flex-col items-center">
+<span class="text-label-code font-label-code text-[11px] font-bold text-tertiary bg-tertiary-fixed px-1.5 py-0.5 rounded-full shadow-sm mb-1">
+                  8
+                </span>
+<span class="w-3.5 h-3.5 rounded-full bg-tertiary border-2 border-surface-container-lowest shadow"></span>
+</div>
+</div>
+<!-- Point 2 -->
+<div class="flex flex-col items-center justify-end relative w-1/5 group">
+<div class="absolute top-[30%] -translate-y-1/2 flex flex-col items-center">
+<span class="text-label-code font-label-code text-[11px] font-bold text-tertiary bg-tertiary-fixed px-1.5 py-0.5 rounded-full shadow-sm mb-1">
+                  7
+                </span>
+<span class="w-3.5 h-3.5 rounded-full bg-tertiary border-2 border-surface-container-lowest shadow"></span>
+</div>
+</div>
+<!-- Point 3 -->
+<div class="flex flex-col items-center justify-end relative w-1/5 group">
+<div class="absolute top-[50%] -translate-y-1/2 flex flex-col items-center">
+<span class="text-label-code font-label-code text-[11px] font-bold text-on-surface-variant bg-surface-container-high px-1.5 py-0.5 rounded-full shadow-sm mb-1">
+                  5
+                </span>
+<span class="w-3.5 h-3.5 rounded-full bg-outline border-2 border-surface-container-lowest shadow"></span>
+</div>
+</div>
+<!-- Point 4 -->
+<div class="flex flex-col items-center justify-end relative w-1/5 group">
+<div class="absolute top-[60%] -translate-y-1/2 flex flex-col items-center">
+<span class="text-label-code font-label-code text-[11px] font-bold text-primary bg-secondary-container px-1.5 py-0.5 rounded-full shadow-sm mb-1">
+                  4
+                </span>
+<span class="w-3.5 h-3.5 rounded-full bg-primary-container border-2 border-surface-container-lowest shadow"></span>
+</div>
+</div>
+<!-- Point 5 (Active / Current) -->
+<div class="flex flex-col items-center justify-end relative w-1/5 group">
+<div class="absolute top-[70%] -translate-y-1/2 flex flex-col items-center">
+<span class="text-label-code font-label-code text-[11px] font-bold text-on-primary bg-primary-container px-1.5 py-0.5 rounded-full ring-2 ring-primary/30 shadow-sm mb-1">
+                  3
+                </span>
+<span class="w-4 h-4 rounded-full bg-primary border-2 border-surface-container-lowest shadow ring-2 ring-primary/40"></span>
+</div>
+</div>
+</div>
+</div>
+<!-- Horizontal X-Axis Timeline Dates -->
+<div class="grid grid-cols-5 text-center mt-3 pt-2 border-t border-outline-variant/30 text-[11px] text-on-surface-variant">
+<div>
+<div class="font-semibold text-on-surface">S1</div>
+<div class="text-outline text-[10px]">12 Mar</div>
+</div>
+<div>
+<div class="font-semibold text-on-surface">S2</div>
+<div class="text-outline text-[10px]">14 Mar</div>
+</div>
+<div>
+<div class="font-semibold text-on-surface">S3</div>
+<div class="text-outline text-[10px]">17 Mar</div>
+</div>
+<div>
+<div class="font-semibold text-on-surface">S4</div>
+<div class="text-outline text-[10px]">24 Mar</div>
+</div>
+<div>
+<div class="font-bold text-primary">S5</div>
+<div class="text-primary font-medium text-[10px]">Hoy</div>
+</div>
+</div>
+</div>
+</section>
+<!-- PRIMARY ACTION BUTTON (PINNED FEEL FOR CLINICAL VELOCITY) -->
+<div>
+<button class="w-full bg-primary-container text-on-primary rounded-lg h-12 flex items-center justify-center gap-2 font-title-sm text-title-sm font-semibold shadow-sm hover:bg-primary active:scale-[0.98] transition-all" type="button">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+        + Registrar Nueva Sesión
+      </button>
+</div>
+<!-- CHRONOLOGICAL SESSION HISTORY -->
+<section class="space-y-3 pb-4">
+<div class="flex items-center justify-between px-1">
+<h2 class="text-title-sm font-title-sm text-on-surface">Historial de Sesiones Registradas</h2>
+<span class="text-label-sm font-label-sm text-outline">5 registros</span>
+</div>
+<!-- Session #5 (Card Detail Expandable) -->
+<article class="bg-surface-container-lowest border-2 border-primary/20 rounded-xl p-space-md shadow-sm relative overflow-hidden">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-full bg-secondary-container/60 text-primary flex items-center justify-center font-bold text-label-sm">
+              #5
+            </span>
+<div>
+<div class="flex items-center gap-2">
+<h3 class="text-title-sm font-title-sm text-on-surface">Sesión #5</h3>
+<span class="text-label-sm font-label-sm bg-primary-container text-on-primary px-2 py-0.5 rounded-full font-semibold">
+                  Hoy
+                </span>
+</div>
+<p class="text-label-sm font-label-sm text-outline">10:30 AM • Fisioterapeuta asignado</p>
+</div>
+</div>
+<!-- VAS Pill Badge -->
+<div class="flex items-center gap-1.5 bg-surface-bright border border-secondary-container px-2.5 py-1 rounded-full">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="text-label-code font-label-code text-primary font-bold text-xs">EVA 3/10</span>
+</div>
+</div>
+<!-- Prescribed Exercises Tags -->
+<div class="mt-3.5 pt-3 border-t border-outline-variant/20">
+<div class="text-label-sm font-label-sm text-on-surface-variant font-medium mb-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="fitness_center">fitness_center</span>
+            3 ejercicios indicados:
+          </div>
+<ul class="space-y-1.5">
+<li class="flex items-center justify-between text-body-md font-body-md bg-surface-bright px-2.5 py-1.5 rounded-md border border-outline-variant/20">
+<span class="text-on-surface">Sentadilla isométrica (apoyo en pared)</span>
+<span class="text-label-code font-label-code text-xs text-primary font-semibold">3x45s</span>
+</li>
+<li class="flex items-center justify-between text-body-md font-body-md bg-surface-bright px-2.5 py-1.5 rounded-md border border-outline-variant/20">
+<span class="text-on-surface">Puente bipodal con banda elástica</span>
+<span class="text-label-code font-label-code text-xs text-primary font-semibold">3x12 reps</span>
+</li>
+<li class="flex items-center justify-between text-body-md font-body-md bg-surface-bright px-2.5 py-1.5 rounded-md border border-outline-variant/20">
+<span class="text-on-surface">Extensión isométrica cuádriceps</span>
+<span class="text-label-code font-label-code text-xs text-primary font-semibold">4x30s</span>
+</li>
+</ul>
+</div>
+<!-- Action Detail Button -->
+<div class="mt-3 pt-2 flex justify-end">
+<button class="text-label-sm font-label-sm font-semibold text-primary flex items-center gap-1 hover:underline active:scale-[0.98]" type="button">
+            Ver detalle completo
+            <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</article>
+<!-- Session #4 -->
+<article class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center font-bold text-label-sm">
+              #4
+            </span>
+<div>
+<h3 class="text-title-sm font-title-sm text-on-surface">Sesión #4</h3>
+<p class="text-label-sm font-label-sm text-outline">24 Mar 2025 • 11:15 AM</p>
+</div>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-bright border border-outline-variant/30 px-2.5 py-1 rounded-full">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="text-label-code font-label-code text-primary font-bold text-xs">EVA 4/10</span>
+</div>
+</div>
+<div class="mt-2.5 flex items-center justify-between text-body-md font-body-md text-on-surface-variant pt-2 border-t border-outline-variant/20">
+<span class="text-label-sm font-label-sm text-on-surface-variant">3 ejercicios prescritos</span>
+<button class="text-label-sm font-label-sm text-primary font-semibold hover:underline flex items-center gap-0.5" type="button">
+            Ver detalle
+            <span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</article>
+<!-- Session #3 -->
+<article class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center font-bold text-label-sm">
+              #3
+            </span>
+<div>
+<h3 class="text-title-sm font-title-sm text-on-surface">Sesión #3</h3>
+<p class="text-label-sm font-label-sm text-outline">17 Mar 2025 • 09:45 AM</p>
+</div>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-bright border border-outline-variant/30 px-2.5 py-1 rounded-full">
+<span class="w-2 h-2 rounded-full bg-outline"></span>
+<span class="text-label-code font-label-code text-on-surface-variant font-bold text-xs">EVA 5/10</span>
+</div>
+</div>
+<div class="mt-2.5 flex items-center justify-between text-body-md font-body-md text-on-surface-variant pt-2 border-t border-outline-variant/20">
+<span class="text-label-sm font-label-sm text-on-surface-variant">2 ejercicios prescritos</span>
+<button class="text-label-sm font-label-sm text-primary font-semibold hover:underline flex items-center gap-0.5" type="button">
+            Ver detalle
+            <span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</article>
+</section>
+</main>
+<!-- BOTTOM NAVIGATION BAR (Exact shared blueprint mapping with 'Evolución' as active contextual state) -->
+<nav aria-label="Navegación principal" class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-space-md py-space-xs h-16 max-w-screen-md mx-auto bg-surface-container-lowest dark:bg-inverse-surface border-t border-outline-variant/30 dark:border-outline/20 shadow-[0_-4px_16px_rgba(13,122,104,0.06)] dark:shadow-none">
+<!-- Item 1: Pacientes -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1.5 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="text-label-sm font-label-sm">Pacientes</span>
+</a>
+<!-- Item 2: Sessão -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1.5 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-150 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="edit_calendar">edit_calendar</span>
+<span class="text-label-sm font-label-sm">Sessão</span>
+</a>
+<!-- Item 3: Evolução (ACTIVE STATE: Contextual Match to Patient Evolution View) -->
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed-dim bg-secondary-container/40 dark:bg-primary-container/30 rounded-xl px-4 py-1.5 transition-all duration-200 active:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="monitoring" data-weight="fill" style="font-variation-settings: 'FILL' 1;">monitoring</span>
+<span class="text-label-sm font-label-sm font-semibold">Evolução</span>
+</a>
+</nav>
+</body></html>
