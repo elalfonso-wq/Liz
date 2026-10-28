@@ -16,7 +16,7 @@
   <!-- Tailwind Script -->
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   
-  <!-- Tailwind Config con tokens exactos del diseño -->
+  <!-- Tailwind Config con tokens exactos de diseño clínico -->
   <script>
     tailwind.config = {
       darkMode: "class",
@@ -74,11 +74,9 @@
     .font-mono-code {
       font-family: 'JetBrains Mono', monospace;
     }
-    /* Estilo para iconos con relleno */
     .icon-fill {
       font-variation-settings: 'FILL' 1;
     }
-    /* Ocultar barra de desplazamiento */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -86,33 +84,47 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+    /* Animación de entrada suave para vistas */
+    .view-container {
+      animation: fadeInView 0.2s ease-in-out;
+    }
+    @keyframes fadeInView {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 
 <body class="bg-background text-on-background antialiased min-h-screen flex flex-col justify-between selection:bg-secondary-container selection:text-primary">
 
   <!-- Contenedor móvil y tablet centrado -->
-  <div class="w-full max-w-screen-md mx-auto min-h-screen flex flex-col relative pb-28">
+  <div class="w-full max-w-screen-md mx-auto min-h-screen flex flex-col relative pb-24">
 
     <!-- CABECERA PRINCIPAL (TopAppBar) -->
     <header class="bg-surface-container-lowest flex justify-between items-center w-full px-4 py-3 h-14 sticky top-0 z-40 border-b border-outline-variant/30">
       <div class="flex items-center gap-2">
+        <button id="btn-header-back" class="hidden mr-1 text-primary hover:bg-surface-container-low p-1 rounded-lg">
+          <span class="material-symbols-outlined text-[22px]">arrow_back</span>
+        </button>
         <span class="material-symbols-outlined text-primary text-[26px]">clinical_notes</span>
         <span class="text-xl font-bold text-primary tracking-tight">FisioConecta</span>
-        <div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded-full border border-outline-variant/40 ml-1">
-          <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-          <span class="text-xs text-primary font-semibold">Modo Clínico</span>
+        <div id="badge-db-status" class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded-full border border-outline-variant/40 ml-1 cursor-pointer" title="Base de Datos">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+          <span id="label-db-status" class="text-[11px] text-primary font-semibold">Modo Clínico Local</span>
         </div>
       </div>
       
       <div class="flex items-center gap-1">
+        <button id="btn-open-firebase-modal" title="Configurar Base de Datos en la Nube" class="w-9 h-9 flex items-center justify-center rounded-lg text-primary hover:bg-surface-container-low active:scale-95 transition-all">
+          <span class="material-symbols-outlined text-[20px]">cloud_sync</span>
+        </button>
         <button id="btn-quick-search-toggle" aria-label="Buscar" class="w-9 h-9 flex items-center justify-center rounded-lg text-primary hover:bg-surface-container-low active:scale-95 transition-all">
           <span class="material-symbols-outlined text-[22px]">search</span>
         </button>
       </div>
     </header>
 
-    <!-- TOAST DE NOTIFICACIÓN FLOTANTE -->
+    <!-- NOTIFICACIÓN FLOTANTE (TOAST) -->
     <div id="toast-container" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 opacity-0 pointer-events-none w-11/12 max-w-sm">
       <div id="toast-body" class="bg-primary text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 border border-primary-container">
         <span id="toast-icon" class="material-symbols-outlined text-[22px]">check_circle</span>
@@ -120,12 +132,12 @@
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- PANTALLA 1: DIRECTORIO DE PACIENTES (ACTIVA) -->
-    <!-- ========================================== -->
-    <main id="view-pacientes" class="flex-1 px-4 pt-4 space-y-4">
+    <!-- ======================================================== -->
+    <!-- PANTALLA 1: DIRECTORIO DE PACIENTES                      -->
+    <!-- ======================================================== -->
+    <main id="view-pacientes" class="view-container flex-1 px-4 pt-4 space-y-4">
 
-      <!-- Barra de métricas rápidas -->
+      <!-- Métrica rápida de pacientes -->
       <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/30 flex items-center justify-between shadow-[0_2px_8px_rgba(13,122,104,0.04)]">
         <div>
           <span class="text-xs text-on-surface-variant block">Pacientes en Seguimiento</span>
@@ -135,7 +147,7 @@
           </div>
         </div>
         <div id="stat-avatar-strip" class="flex -space-x-1.5 items-center">
-          <!-- Avatares con código dinámico -->
+          <!-- Avatares dinámicos -->
         </div>
       </section>
 
@@ -156,29 +168,25 @@
         </div>
       </section>
 
-      <!-- Barra de filtros rápidos por dolor (Escala VAS) -->
+      <!-- Filtro por Escala EVA -->
       <section class="space-y-1.5">
         <div class="flex items-center justify-between">
-          <span class="text-xs text-on-surface-variant font-medium">Filtro por Escala de Dolor (VAS)</span>
+          <span class="text-xs text-on-surface-variant font-medium">Filtro por Escala de Dolor (EVA)</span>
           <span id="filter-count-badge" class="text-xs text-secondary font-medium">0 registros</span>
         </div>
         <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-          <!-- Filtro Todos -->
           <button data-filter="all" class="btn-filter flex-shrink-0 px-3.5 py-1.5 rounded-full bg-primary-container text-white text-xs font-semibold active:scale-95 transition-all flex items-center gap-1.5 shadow-sm">
             <span>Todos</span>
             <span id="count-all" class="bg-primary/50 text-white rounded-full px-1.5 text-[10px] py-0.5">0</span>
           </button>
-          <!-- Filtro Leve -->
           <button data-filter="mild" class="btn-filter flex-shrink-0 px-3.5 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface hover:bg-surface-container-low text-xs font-medium active:scale-95 transition-all flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
             <span>Dolor Leve (0-3)</span>
           </button>
-          <!-- Filtro Moderado -->
           <button data-filter="moderate" class="btn-filter flex-shrink-0 px-3.5 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface hover:bg-surface-container-low text-xs font-medium active:scale-95 transition-all flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-[#F59E0B]"></span>
             <span>Dolor Moderado (4-6)</span>
           </button>
-          <!-- Filtro Intenso -->
           <button data-filter="severe" class="btn-filter flex-shrink-0 px-3.5 py-1.5 rounded-full bg-surface-container-lowest border border-outline-variant/40 text-on-surface hover:bg-surface-container-low text-xs font-medium active:scale-95 transition-all flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-[#EF4444]"></span>
             <span>Dolor Intenso (7-10)</span>
@@ -186,19 +194,19 @@
         </div>
       </section>
 
-      <!-- Lista dinámica de tarjetas de pacientes -->
+      <!-- Lista de pacientes -->
       <section id="patient-list-container" class="space-y-3 pt-1">
-        <!-- Renderizado dinámico desde app.js -->
+        <!-- Render dinámico -->
       </section>
 
-      <!-- Estado vacío (cuando no hay resultados) -->
+      <!-- Estado vacío -->
       <div id="empty-state" class="hidden text-center py-12 px-4 bg-surface-container-lowest rounded-xl border border-dashed border-outline-variant/60">
         <span class="material-symbols-outlined text-4xl text-outline mb-2">person_search</span>
         <h4 class="text-base font-semibold text-on-surface">No se encontraron pacientes</h4>
         <p class="text-xs text-on-surface-variant mt-1">Prueba con otro término de búsqueda o registra una nueva ficha.</p>
       </div>
 
-      <!-- Botón ergonómico principal: Registrar Nuevo Paciente -->
+      <!-- Botón Registrar Nuevo Paciente -->
       <div class="pt-3 sticky bottom-20 z-30">
         <button id="btn-open-register-modal" class="w-full h-12 bg-primary-container text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(13,122,104,0.25)] hover:bg-primary active:scale-[0.98] transition-all">
           <span class="material-symbols-outlined text-[22px]">person_add</span>
@@ -208,13 +216,292 @@
 
     </main>
 
-    <!-- ========================================== -->
-    <!-- MODAL: REGISTRAR NUEVO PACIENTE           -->
-    <!-- ========================================== -->
+    <!-- ======================================================== -->
+    <!-- PANTALLA 2: REGISTRAR NUEVA SESIÓN (Función 2)           -->
+    <!-- ======================================================== -->
+    <main id="view-sesion" class="view-container hidden flex-1 px-4 pt-3 space-y-4">
+
+      <!-- Banner de contexto de la sesión -->
+      <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-sm space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-semibold text-on-surface-variant">Paciente para la Sesión</span>
+          <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
+            <span class="material-symbols-outlined text-[16px] text-primary">calendar_today</span>
+            <input type="date" id="session-input-date" class="bg-transparent border-0 p-0 text-xs text-on-surface font-semibold focus:ring-0 cursor-pointer"/>
+          </div>
+        </div>
+
+        <!-- Selector de paciente -->
+        <div class="grid grid-cols-12 gap-2 items-center">
+          <div class="col-span-8">
+            <select id="session-patient-select" class="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-sm font-bold text-primary focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none">
+              <!-- Opciones dinámicas de pacientes -->
+            </select>
+          </div>
+          <div class="col-span-4 text-right">
+            <span id="session-counter-badge" class="font-mono-code text-xs font-bold text-secondary bg-surface-container px-2 py-1 rounded-md">
+              Sesión #1
+            </span>
+          </div>
+        </div>
+
+        <!-- Info rápida de zona y diagnóstico del paciente -->
+        <div id="session-patient-info-strip" class="pt-2 border-t border-outline-variant/20 flex items-center justify-between text-xs text-on-surface-variant">
+          <span id="session-patient-diagnosis" class="font-medium text-on-surface">Cargando diagnóstico...</span>
+          <span id="session-patient-prev-pain" class="text-secondary font-semibold">Previo: --/10</span>
+        </div>
+      </section>
+
+      <!-- SECCIÓN EVA: Escala Visual de Dolor (0 al 10) -->
+      <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">vital_signs</span>
+            <h3 class="text-sm font-bold text-on-surface">Nivel de Dolor (Escala EVA)</h3>
+          </div>
+          <span id="session-eva-score-badge" class="font-mono-code text-xs font-bold text-secondary bg-surface-container-low px-2 py-0.5 rounded-full">
+            4 / 10
+          </span>
+        </div>
+
+        <!-- Tarjeta de estado actual de dolor -->
+        <div id="session-eva-status-card" class="bg-amber-50 rounded-xl p-3 border border-amber-200 flex items-center justify-between">
+          <div>
+            <div class="text-[11px] text-on-surface-variant">Valoración EVA al inicio</div>
+            <div id="session-eva-status-text" class="text-sm font-bold text-amber-800">
+              4 - Dolor Moderado Soportable
+            </div>
+          </div>
+          <div id="session-eva-status-circle" class="h-10 w-10 rounded-full bg-amber-500 text-white font-mono-code text-lg font-bold flex items-center justify-center shadow-sm">
+            4
+          </div>
+        </div>
+
+        <!-- Barra táctil de 11 botones (0 al 10) -->
+        <div>
+          <div class="flex justify-between items-center gap-1 overflow-x-auto pb-1 no-scrollbar" id="session-eva-rail">
+            <!-- Botones EVA 0 a 10 generados dinámicamente -->
+          </div>
+          <div class="flex justify-between items-center px-1 text-[10px] text-on-surface-variant pt-1 font-semibold">
+            <span class="text-emerald-700">0 - Sin dolor</span>
+            <span class="text-amber-700">5 - Moderado</span>
+            <span class="text-rose-700">10 - Incompatible</span>
+          </div>
+        </div>
+
+        <!-- Comparación con la sesión anterior -->
+        <div id="session-eva-delta-banner" class="bg-surface-container-low rounded-lg p-2.5 flex items-center justify-between border border-outline-variant/30 text-xs">
+          <div class="flex items-center gap-1.5">
+            <span id="session-delta-icon" class="material-symbols-outlined text-secondary text-[18px]">trending_flat</span>
+            <span id="session-delta-text" class="text-on-surface font-medium">Comparación vs sesión previa</span>
+          </div>
+          <span id="session-delta-pill" class="font-bold text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+            Estable
+          </span>
+        </div>
+      </section>
+
+      <!-- SECCIÓN EJERCICIOS REALIZADOS O INDICADOS -->
+      <section class="space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">fitness_center</span>
+            <h3 class="text-sm font-bold text-on-surface">Ejercicios Realizados</h3>
+          </div>
+          <span id="session-exercise-count-label" class="text-xs text-on-surface-variant font-medium">0 ejercicios</span>
+        </div>
+
+        <!-- Contenedor dinámico de tarjetas de ejercicios -->
+        <div id="session-exercises-list" class="space-y-3">
+          <!-- Tarjetas de ejercicios inyectadas con JS -->
+        </div>
+
+        <!-- Botón para añadir ejercicio -->
+        <div class="bg-surface-container-lowest rounded-xl p-3.5 border border-dashed border-outline-variant/60 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-primary flex items-center gap-1">
+              <span class="material-symbols-outlined text-[18px]">add_circle</span>
+              Añadir Ejercicio al Protocolo
+            </span>
+          </div>
+
+          <div class="space-y-2">
+            <div>
+              <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Nombre del Ejercicio</label>
+              <div class="flex gap-2">
+                <input 
+                  type="text" 
+                  id="input-new-exercise-name" 
+                  placeholder="Ej. Isometría de cuádriceps, Sentadilla..." 
+                  class="flex-1 bg-surface-container-low border border-outline-variant/60 rounded-lg px-3 py-2 text-xs text-on-surface focus:border-primary-container outline-none"
+                />
+                <button type="button" id="btn-add-exercise" class="px-4 py-2 bg-primary-container text-white text-xs font-bold rounded-lg hover:bg-primary active:scale-95 transition-all shadow-sm">
+                  + Agregar
+                </button>
+              </div>
+            </div>
+
+            <!-- Sugerencias rápidas de ejercicios -->
+            <div>
+              <span class="text-[10px] text-outline block mb-1">Sugerencias rápidas:</span>
+              <div class="flex flex-wrap gap-1.5" id="exercise-presets-container">
+                <!-- Chips de ejercicios comunes -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN NOTAS CLÍNICAS -->
+      <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-sm space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-[20px]">notes</span>
+          <h3 class="text-sm font-bold text-on-surface">Observaciones Clínicas del Terapeuta</h3>
+        </div>
+        <textarea 
+          id="session-input-notes" 
+          rows="3" 
+          placeholder="Anota la respuesta del paciente, tolerancia a las cargas, dolor compensatorio o recomendaciones para casa..." 
+          class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2.5 text-xs text-on-surface focus:border-primary-container outline-none resize-none leading-relaxed"
+        ></textarea>
+      </section>
+
+      <!-- BOTÓN FINALIZAR Y GUARDAR SESIÓN -->
+      <div class="pt-2 sticky bottom-20 z-30">
+        <button id="btn-save-session" class="w-full h-12 bg-primary-container text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(13,122,104,0.25)] hover:bg-primary active:scale-[0.98] transition-all">
+          <span class="material-symbols-outlined text-[22px]">save</span>
+          <span>Finalizar y Guardar Sesión</span>
+        </button>
+      </div>
+
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- PANTALLA 3: EVOLUCIÓN HISTÓRICA Y GRÁFICA (Función 3)    -->
+    <!-- ======================================================== -->
+    <main id="view-evolucion" class="view-container hidden flex-1 px-4 pt-3 space-y-4">
+
+      <!-- Ficha superior de identificación y resumen del paciente -->
+      <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/30 shadow-sm space-y-3">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="evol-patient-code" class="font-mono-code font-bold text-xs bg-surface-container text-primary px-3 py-1 rounded-full border border-secondary-container">
+                #PAC-842
+              </span>
+              <span class="inline-flex items-center gap-1 text-[11px] text-primary bg-surface-bright border border-secondary-container px-2 py-0.5 rounded-full font-semibold">
+                <span class="material-symbols-outlined text-[13px]">shield</span>
+                Privacidad clínica
+              </span>
+            </div>
+            <h2 id="evol-patient-diagnosis" class="text-lg font-bold text-on-surface mt-2">
+              Tendinopatía rotuliana
+            </h2>
+            <p id="evol-patient-zone" class="text-xs text-on-surface-variant flex items-center gap-1 mt-0.5">
+              <span class="material-symbols-outlined text-[15px] text-primary">accessibility_new</span>
+              Rodilla derecha • Miembro inferior
+            </p>
+          </div>
+
+          <!-- Selector de paciente para cambiar de ficha -->
+          <div class="w-36">
+            <label class="block text-[10px] text-outline mb-0.5">Cambiar ficha:</label>
+            <select id="evol-patient-select" class="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg p-1.5 text-xs font-bold text-primary outline-none">
+              <!-- Opciones dinámicas -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Tira de metadatos clínicos -->
+        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-outline-variant/20">
+          <div class="flex items-center gap-2 bg-surface-bright p-2 rounded-lg border border-outline-variant/20">
+            <span class="material-symbols-outlined text-primary text-base">calendar_month</span>
+            <div>
+              <span class="text-[10px] text-outline block">Inicio de tratamiento</span>
+              <span id="evol-patient-start-date" class="text-xs font-bold text-on-surface">12 Mar 2025</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 bg-surface-bright p-2 rounded-lg border border-outline-variant/20">
+            <span class="material-symbols-outlined text-primary text-base">counter_5</span>
+            <div>
+              <span class="text-[10px] text-outline block">Sesiones hechas</span>
+              <span id="evol-patient-sessions-count" class="text-xs font-bold text-on-surface">5 completadas</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TARJETA DE GRÁFICA DE EVOLUCIÓN DEL DOLOR (EVA) -->
+      <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/30 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">monitoring</span>
+            <h3 class="text-sm font-bold text-on-surface">Evolución del Dolor en el Tiempo</h3>
+          </div>
+          <span class="text-[11px] font-semibold text-secondary">Escala EVA (0-10)</span>
+        </div>
+
+        <!-- Métricas comparativas de dolor -->
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-surface-bright p-2.5 rounded-lg border border-outline-variant/20">
+            <span class="text-[10px] text-outline block">Dolor Inicial</span>
+            <span id="evol-metric-initial-pain" class="font-mono-code text-base font-bold text-rose-600">7/10</span>
+          </div>
+          <div class="bg-surface-bright p-2.5 rounded-lg border border-outline-variant/20">
+            <span class="text-[10px] text-outline block">Dolor Actual</span>
+            <span id="evol-metric-current-pain" class="font-mono-code text-base font-bold text-emerald-600">3/10</span>
+          </div>
+          <div class="bg-surface-bright p-2.5 rounded-lg border border-outline-variant/20">
+            <span class="text-[10px] text-outline block">Mejora</span>
+            <span id="evol-metric-delta-pain" class="font-mono-code text-base font-bold text-primary">-57%</span>
+          </div>
+        </div>
+
+        <!-- Lienzo / Contenedor SVG Interactivo de la gráfica -->
+        <div class="bg-surface-container-low/40 rounded-xl p-3 border border-outline-variant/20">
+          <div id="chart-svg-container" class="w-full h-48 relative">
+            <!-- SVG dinámico inyectado por app.js -->
+          </div>
+          <div class="flex justify-between items-center text-[10px] text-outline pt-2 px-1">
+            <span>Sesión 1</span>
+            <span class="text-secondary font-medium">Tendencia Favorable</span>
+            <span>Última Sesión</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- HISTORIAL CRONOLÓGICO DE SESIONES -->
+      <section class="space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">history</span>
+            <h3 class="text-sm font-bold text-on-surface">Historial de Sesiones Registradas</h3>
+          </div>
+          <span id="evol-history-count-badge" class="text-xs text-secondary font-medium">5 registros</span>
+        </div>
+
+        <!-- Contenedor dinámico de sesiones pasadas -->
+        <div id="evol-sessions-history-list" class="space-y-2.5">
+          <!-- Tarjetas de historial inyectadas con JS -->
+        </div>
+      </section>
+
+      <!-- Botón para registrar nueva sesión para este paciente -->
+      <div class="pt-2 sticky bottom-20 z-30">
+        <button id="btn-evol-new-session" class="w-full h-12 bg-primary-container text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(13,122,104,0.25)] hover:bg-primary active:scale-[0.98] transition-all">
+          <span class="material-symbols-outlined text-[20px]">add</span>
+          <span>+ Registrar Nueva Sesión para este Paciente</span>
+        </button>
+      </div>
+
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- MODAL 1: REGISTRAR NUEVO PACIENTE                        -->
+    <!-- ======================================================== -->
     <div id="modal-new-patient" class="fixed inset-0 z-50 bg-[#1E2928]/50 backdrop-blur-sm hidden items-center justify-center p-4">
-      <div class="bg-surface-container-lowest rounded-2xl max-w-sm w-full p-5 shadow-[0_16px_32px_-8px_rgba(13,122,104,0.25)] border border-outline-variant/30 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+      <div class="bg-surface-container-lowest rounded-2xl max-w-sm w-full p-5 shadow-[0_16px_32px_-8px_rgba(13,122,104,0.25)] border border-outline-variant/30 space-y-4">
         
-        <!-- Cabecera del Modal -->
         <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-[24px]">badge</span>
@@ -229,9 +516,7 @@
           Ficha 100% anónima. Protege la privacidad clínica del paciente mediante códigos ficticios.
         </p>
 
-        <!-- Formulario -->
         <form id="form-new-patient" class="space-y-3.5">
-          <!-- Código del Paciente -->
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="block text-xs font-semibold text-on-surface-variant" for="input-patient-code">
@@ -242,20 +527,16 @@
                 Generar otro
               </button>
             </div>
-            <div class="relative">
-              <input 
-                type="text" 
-                id="input-patient-code" 
-                required 
-                maxlength="15" 
-                placeholder="PAC-000"
-                class="font-mono-code font-bold w-full bg-surface-container-low border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-primary focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none"
-              />
-            </div>
-            <span class="text-[10px] text-outline mt-0.5 block">Código único para identificar al paciente en consulta.</span>
+            <input 
+              type="text" 
+              id="input-patient-code" 
+              required 
+              maxlength="15" 
+              placeholder="PAC-000"
+              class="font-mono-code font-bold w-full bg-surface-container-low border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-primary focus:border-primary-container outline-none"
+            />
           </div>
 
-          <!-- Diagnóstico / Condición -->
           <div>
             <label class="block text-xs font-semibold text-on-surface-variant mb-1" for="input-patient-condition">
               Diagnóstico / Motivo de Consulta <span class="text-error">*</span>
@@ -265,11 +546,10 @@
               id="input-patient-condition" 
               required 
               placeholder="Ej. Tendinopatía rotuliana, Lumbalgia..." 
-              class="w-full bg-surface-container-lowest border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none"
+              class="w-full bg-surface-container-lowest border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-primary-container outline-none"
             />
           </div>
 
-          <!-- Región Anatómica -->
           <div>
             <label class="block text-xs font-semibold text-on-surface-variant mb-1" for="input-patient-zone">
               Zona Corporal Afectada
@@ -278,11 +558,10 @@
               type="text" 
               id="input-patient-zone" 
               placeholder="Ej. Rodilla derecha, Hombro izquierdo..." 
-              class="w-full bg-surface-container-lowest border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-primary-container focus:ring-1 focus:ring-primary-container outline-none"
+              class="w-full bg-surface-container-lowest border border-outline-variant/60 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-primary-container outline-none"
             />
           </div>
 
-          <!-- Dolor Inicial de Referencia -->
           <div>
             <label class="block text-xs font-semibold text-on-surface-variant mb-1">
               Dolor inicial estimado (0 a 10)
@@ -302,13 +581,11 @@
             </div>
           </div>
 
-          <!-- Mensaje de error si código duplicado -->
           <div id="modal-error-message" class="hidden text-xs text-error bg-error-container/40 p-2 rounded-lg border border-error/20 flex items-center gap-1.5">
             <span class="material-symbols-outlined text-[16px]">error</span>
             <span id="modal-error-text">Este código ya existe.</span>
           </div>
 
-          <!-- Botones de Acción -->
           <div class="flex gap-2 pt-2">
             <button 
               type="button" 
@@ -331,9 +608,91 @@
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- MODAL DE ACCIONES DE PACIENTE SELECCIONADO -->
-    <!-- ========================================== -->
+    <!-- ======================================================== -->
+    <!-- MODAL 2: CONSULTA DE SESIÓN PASADA (Screen 4)            -->
+    <!-- ======================================================== -->
+    <div id="modal-session-detail" class="fixed inset-0 z-50 bg-[#1E2928]/60 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-4">
+      <div class="bg-surface-container-lowest rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto p-5 shadow-2xl border border-outline-variant/30 space-y-4">
+        
+        <!-- Cabecera de la sesión pasada -->
+        <div class="flex items-center justify-between pb-3 border-b border-outline-variant/30">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="detail-session-code" class="font-mono-code font-bold text-xs bg-surface-container text-primary px-2.5 py-0.5 rounded border border-secondary-container">
+                PAC-842
+              </span>
+              <span id="detail-session-date" class="text-xs font-semibold text-secondary">
+                27 Mar, 2025
+              </span>
+            </div>
+            <h3 id="detail-session-title" class="text-base font-bold text-on-surface mt-1">
+              Registro Clínico Finalizado
+            </h3>
+          </div>
+          <button id="btn-close-session-detail" class="text-outline hover:text-on-surface p-1 rounded-lg">
+            <span class="material-symbols-outlined text-[22px]">close</span>
+          </button>
+        </div>
+
+        <!-- Tarjeta de Dolor EVA Registrado -->
+        <div class="bg-surface-bright p-3.5 rounded-xl border border-secondary-container/60 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-[20px]">vital_signs</span>
+              <span class="text-xs font-bold text-on-surface">Dolor Registrado (EVA)</span>
+            </div>
+            <span id="detail-session-pain-pill" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+              3/10 Leve
+            </span>
+          </div>
+          
+          <div class="flex items-baseline gap-2">
+            <span id="detail-session-pain-score" class="font-mono-code text-3xl font-extrabold text-primary">3</span>
+            <span class="text-xs text-on-surface-variant font-medium">/ 10 en escala analógica</span>
+          </div>
+
+          <!-- Barra de 11 escalones EVA -->
+          <div id="detail-session-gauge" class="grid grid-cols-11 gap-1 pt-1">
+            <!-- 11 barras coloreadas con JS -->
+          </div>
+        </div>
+
+        <!-- Ejercicios Realizados -->
+        <div class="space-y-2">
+          <h4 class="text-xs font-bold text-on-surface flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-primary text-[18px]">exercise</span>
+            Ejercicios Realizados en esta Sesión
+          </h4>
+          <div id="detail-session-exercises-list" class="space-y-2">
+            <!-- Lista inyectada por JS -->
+          </div>
+        </div>
+
+        <!-- Criterio Clínico y Notas -->
+        <div class="bg-surface-container-low p-3 rounded-xl border border-outline-variant/30 space-y-1">
+          <span class="text-[11px] font-bold text-primary uppercase tracking-wider block">Observaciones Clínicas:</span>
+          <p id="detail-session-notes" class="text-xs text-on-surface leading-relaxed">
+            Sin observaciones registradas.
+          </p>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex gap-2 pt-1">
+          <button id="btn-repeat-session-exercises" class="flex-1 h-11 bg-primary-container text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 hover:bg-primary active:scale-95 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">replay</span>
+            <span>Repetir en Nueva Sesión</span>
+          </button>
+          <button id="btn-dismiss-session-detail" class="px-4 h-11 border border-outline text-on-surface text-xs font-semibold rounded-xl hover:bg-surface-container-low active:scale-95 transition-all">
+            Cerrar
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL 3: ACCIONES RÁPIDAS DE PACIENTE                    -->
+    <!-- ======================================================== -->
     <div id="modal-patient-actions" class="fixed inset-0 z-50 bg-[#1E2928]/40 backdrop-blur-sm hidden items-end sm:items-center justify-center p-0 sm:p-4">
       <div class="bg-surface-container-lowest rounded-t-2xl sm:rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-outline-variant/30 space-y-4">
         <div class="flex items-center justify-between">
@@ -354,19 +713,16 @@
         </div>
 
         <div class="space-y-2 pt-1">
-          <!-- Botón Registrar Sesión -->
           <button id="btn-action-new-session" class="w-full h-11 bg-primary-container text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary active:scale-95 transition-all shadow-sm">
             <span class="material-symbols-outlined text-[18px]">edit_calendar</span>
             <span>Registrar Nueva Sesión</span>
           </button>
 
-          <!-- Botón Ver Evolución -->
           <button id="btn-action-view-evolution" class="w-full h-11 bg-surface-container-low border border-outline-variant/40 text-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-surface-container active:scale-95 transition-all">
             <span class="material-symbols-outlined text-[18px]">monitoring</span>
-            <span>Ver Evolución y Gráfica</span>
+            <span>Ver Evolución y Gráfica de Dolor</span>
           </button>
 
-          <!-- Botón Eliminar Ficha -->
           <button id="btn-action-delete" class="w-full h-9 text-error text-xs font-semibold rounded-lg flex items-center justify-center gap-1 hover:bg-red-50 active:scale-95 transition-all">
             <span class="material-symbols-outlined text-[16px]">delete</span>
             <span>Eliminar Ficha</span>
@@ -375,25 +731,65 @@
       </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- BARRA DE NAVEGACIÓN INFERIOR (BottomNav)   -->
-    <!-- ========================================== -->
+    <!-- ======================================================== -->
+    <!-- MODAL 4: CONFIGURACIÓN FIREBASE (FASE FINAL)             -->
+    <!-- ======================================================== -->
+    <div id="modal-firebase" class="fixed inset-0 z-50 bg-[#1E2928]/50 backdrop-blur-sm hidden items-center justify-center p-4">
+      <div class="bg-surface-container-lowest rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-outline-variant/30 space-y-4">
+        <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+          <div class="flex items-center gap-2 text-primary">
+            <span class="material-symbols-outlined text-[24px]">cloud</span>
+            <h4 class="text-base font-bold text-on-surface">Base de Datos en la Nube</h4>
+          </div>
+          <button id="btn-close-firebase-modal" class="text-outline hover:text-on-surface p-1">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <p class="text-xs text-on-surface-variant leading-relaxed">
+          Actualmente la aplicación guarda los datos en tu navegador (<strong>Modo Local Offline</strong>). Cuando quieras activar <strong>Firebase Firestore</strong>, solo se ingresa la clave de configuración aquí:
+        </p>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Clave de Configuración Firebase (JSON)</label>
+          <textarea 
+            id="firebase-config-input" 
+            rows="4" 
+            placeholder='{ "apiKey": "...", "projectId": "..." }' 
+            class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs font-mono-code text-on-surface focus:border-primary-container outline-none"
+          ></textarea>
+        </div>
+
+        <div class="flex gap-2 pt-1">
+          <button id="btn-save-firebase" class="flex-1 h-10 bg-primary-container text-white text-xs font-bold rounded-lg hover:bg-primary active:scale-95 transition-all">
+            Guardar y Conectar
+          </button>
+          <button id="btn-cancel-firebase" class="px-3 h-10 border border-outline text-on-surface text-xs font-semibold rounded-lg hover:bg-surface-container-low">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- BARRA DE NAVEGACIÓN INFERIOR (BottomNav)                 -->
+    <!-- ======================================================== -->
     <nav class="fixed bottom-0 left-0 w-full z-40 flex justify-around items-center px-4 py-2 h-16 max-w-screen-md mx-auto bg-surface-container-lowest shadow-[0_-4px_16px_rgba(13,122,104,0.06)] border-t border-outline-variant/30">
       
-      <!-- Pestaña 1: Pacientes (ACTIVA) -->
-      <button id="tab-nav-pacientes" class="flex flex-col items-center justify-center text-primary bg-secondary-container/40 rounded-xl px-4 py-1.5 transition-all active:scale-95">
+      <!-- Pestaña 1: Pacientes -->
+      <button id="tab-nav-pacientes" class="nav-tab flex flex-col items-center justify-center text-primary bg-secondary-container/40 rounded-xl px-4 py-1.5 transition-all active:scale-95">
         <span class="material-symbols-outlined text-[22px] icon-fill">group</span>
         <span class="text-[11px] font-bold tracking-tight">Pacientes</span>
       </button>
 
-      <!-- Pestaña 2: Nueva Sesión (Próxima Función) -->
-      <button id="tab-nav-sesion" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-4 py-1.5 transition-colors active:scale-95">
+      <!-- Pestaña 2: Nueva Sesión -->
+      <button id="tab-nav-sesion" class="nav-tab flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-4 py-1.5 transition-colors active:scale-95">
         <span class="material-symbols-outlined text-[22px]">edit_calendar</span>
         <span class="text-[11px] font-medium">Nueva Sesión</span>
       </button>
 
-      <!-- Pestaña 3: Evolución (Próxima Función) -->
-      <button id="tab-nav-evolucion" class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-4 py-1.5 transition-colors active:scale-95">
+      <!-- Pestaña 3: Evolución -->
+      <button id="tab-nav-evolucion" class="nav-tab flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-4 py-1.5 transition-colors active:scale-95">
         <span class="material-symbols-outlined text-[22px]">monitoring</span>
         <span class="text-[11px] font-medium">Evolución</span>
       </button>
@@ -401,7 +797,7 @@
 
   </div>
 
-  <!-- Scripts de la aplicación -->
+  <!-- Scripts -->
   <script src="js/db.js"></script>
   <script src="js/app.js"></script>
 </body>
