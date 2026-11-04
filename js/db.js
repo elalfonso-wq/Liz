@@ -219,6 +219,19 @@ const SEED_SESSIONS = [
   }
 ];
 
+// Consulta de ejemplo clínica de IA inicial
+const SEED_AI_QUERIES = [
+  {
+    id: 'ai-init-842',
+    codigoPaciente: 'PAC-842',
+    pregunta: 'Progresión de Carga: ¿Qué ejercicios excéntricos se recomiendan para tendinopatía rotuliana con dolor EVA 3/10?',
+    respuesta: 'Para tendinopatía rotuliana en fase de readaptación funcional (EVA 3/10):\n\n1. **Sentadilla declinada en cuña (25°)**: 3 series de 10-12 repeticiones, controlando la bajada en 3 segundos.\n2. **Isometría analgésica de pre-activación**: Sostén en pared a 60° de flexión durante 45 segundos antes de las series activas.\n3. **Criterios de seguridad**: Mantener el dolor por debajo de 4/10 y verificar que ceda dentro de las 24 horas posteriores.',
+    promptGenerado: 'Actúa como especialista en Fisioterapia. Paciente anónimo PAC-842 con Tendinopatía rotuliana...',
+    fecha: '27 Mar, 2025, 11:30 AM',
+    timestamp: 1743089400000
+  }
+];
+
 class FisioDB {
   constructor() {
     this.firestore = null;
@@ -236,8 +249,9 @@ class FisioDB {
     if (!localStorage.getItem(DB_KEYS.SESSIONS)) {
       localStorage.setItem(DB_KEYS.SESSIONS, JSON.stringify(SEED_SESSIONS));
     }
-    if (!localStorage.getItem(DB_KEYS.AI_QUERIES)) {
-      localStorage.setItem(DB_KEYS.AI_QUERIES, JSON.stringify([]));
+    const savedQueries = localStorage.getItem(DB_KEYS.AI_QUERIES);
+    if (!savedQueries || JSON.parse(savedQueries).length === 0) {
+      localStorage.setItem(DB_KEYS.AI_QUERIES, JSON.stringify(SEED_AI_QUERIES));
     }
 
     // 2. Conectar con Firebase Firestore si el SDK está cargado
@@ -304,6 +318,25 @@ class FisioDB {
 
         await batch.commit();
         console.log('✅ ¡Datos sincronizados con éxito en Firebase Firestore!');
+      }
+
+      // 1.1 Si consultas_ia está vacía en Firestore, crearla con las consultas iniciales
+      try {
+        const queriesSnapshot = await this.firestore.collection('consultas_ia').get();
+        if (queriesSnapshot.empty) {
+          const currentQueries = this.getAIQueries();
+          if (currentQueries.length > 0) {
+            const batchQueries = this.firestore.batch();
+            currentQueries.forEach(q => {
+              const docRef = this.firestore.collection('consultas_ia').doc(q.id);
+              batchQueries.set(docRef, q);
+            });
+            await batchQueries.commit();
+            console.log('✅ Colección consultas_ia inicializada en Firestore');
+          }
+        }
+      } catch (errQ) {
+        console.warn('Nota sobre consultas_ia en Firestore:', errQ);
       }
 
       this.cloudStatus = { state: 'connected', message: 'Firebase Conectado en Tiempo Real' };
