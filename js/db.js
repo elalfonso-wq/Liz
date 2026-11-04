@@ -16,7 +16,9 @@ const FIREBASE_CONFIG = {
 
 const DB_KEYS = {
   PATIENTS: 'fisioconecta_patients_v1',
-  SESSIONS: 'fisioconecta_sessions_v1'
+  SESSIONS: 'fisioconecta_sessions_v1',
+  AI_QUERIES: 'fisioconecta_ai_queries_v1',
+  GEMINI_KEY: 'fisioconecta_gemini_api_key'
 };
 
 // Datos clínicos de base para inicializar la nube si está vacía
@@ -225,12 +227,17 @@ class FisioDB {
   }
 
   init() {
+    this.cloudStatus = { state: 'local', message: 'Modo local offline' };
+
     // 1. Respaldo local inmediato para render instantáneo
     if (!localStorage.getItem(DB_KEYS.PATIENTS)) {
       localStorage.setItem(DB_KEYS.PATIENTS, JSON.stringify(SEED_PATIENTS));
     }
     if (!localStorage.getItem(DB_KEYS.SESSIONS)) {
       localStorage.setItem(DB_KEYS.SESSIONS, JSON.stringify(SEED_SESSIONS));
+    }
+    if (!localStorage.getItem(DB_KEYS.AI_QUERIES)) {
+      localStorage.setItem(DB_KEYS.AI_QUERIES, JSON.stringify([]));
     }
 
     // 2. Conectar con Firebase Firestore si el SDK está cargado
@@ -241,13 +248,17 @@ class FisioDB {
         }
         this.firestore = firebase.firestore();
         this.isCloudEnabled = true;
-        console.log('✅ Firebase Firestore conectado exitosamente.');
+        this.cloudStatus = { state: 'connecting', message: 'Conectando con Firestore...' };
+        this.dispatchChangeEvent('cloud-status');
+        console.log('✅ Firebase SDK inicializado.');
 
         // Activar sincronización en la nube y tiempo real
         this.syncWithCloud();
       } catch (err) {
         console.warn('⚠️ Error al inicializar Firebase, operando en modo local:', err);
         this.isCloudEnabled = false;
+        this.cloudStatus = { state: 'error', message: err.message };
+        this.dispatchChangeEvent('cloud-status');
       }
     }
   }
@@ -255,27 +266,48 @@ class FisioDB {
   /**
    * Sincronización bidireccional con Firestore en la nube
    */
-  async syncWithCloud() {
-    if (!this.isCloudEnabled || !this.firestore) return;
+  async syncWithCloud(force = false) {
+    if (!this.isCloudEnabled || !this.firestore) {
+      this.cloudStatus = { state: 'local', message: 'Firebase no inicializado' };
+      this.dispatchChangeEvent('cloud-status');
+      return { success: false, message: 'Firebase no está inicializado' };
+    }
+
+    this.cloudStatus = { state: 'syncing', message: 'Sincronizando con Firestore...' };
+    this.dispatchChangeEvent('cloud-status');
 
     try {
       // 1. Verificar si existen pacientes en Firestore
       const patientsSnapshot = await this.firestore.collection('pacientes').get();
-      if (patientsSnapshot.empty) {
-        console.log('Inicializando datos en Firebase Firestore...');
-        // Subir pacientes demo a la nube
+      
+      if (patientsSnapshot.empty || force) {
+        console.log('Subiendo datos locales a Firebase Firestore...');
         const batch = this.firestore.batch();
-        SEED_PATIENTS.forEach(p => {
+        
+        const currentPatients = this.getPatients();
+        currentPatients.forEach(p => {
           const docRef = this.firestore.collection('pacientes').doc(p.codigo);
           batch.set(docRef, p);
         });
-        SEED_SESSIONS.forEach(s => {
+
+        const currentSessions = this.getAllSessions();
+        currentSessions.forEach(s => {
           const docRef = this.firestore.collection('sesiones').doc(s.id);
           batch.set(docRef, s);
         });
+
+        const currentQueries = this.getAIQueries();
+        currentQueries.forEach(q => {
+          const docRef = this.firestore.collection('consultas_ia').doc(q.id);
+          batch.set(docRef, q);
+        });
+
         await batch.commit();
-        console.log('✅ Datos iniciales guardados en Firebase Firestore.');
+        console.log('✅ ¡Datos sincronizados con éxito en Firebase Firestore!');
       }
+
+      this.cloudStatus = { state: 'connected', message: 'Firebase Conectado en Tiempo Real' };
+      this.dispatchChangeEvent('cloud-status');
 
       // 2. Escuchar cambios en tiempo real en la colección 'pacientes'
       this.firestore.collection('pacientes').onSnapshot((snapshot) => {
@@ -286,7 +318,7 @@ class FisioDB {
           this.dispatchChangeEvent('patients');
         }
       }, (error) => {
-        console.warn('Lectura Firestore pacientes:', error);
+        console.warn('Error en listener de pacientes:', error);
       });
 
       // 3. Escuchar cambios en tiempo real en la colección 'sesiones'
@@ -298,11 +330,32 @@ class FisioDB {
           this.dispatchChangeEvent('sessions');
         }
       }, (error) => {
-        console.warn('Lectura Firestore sesiones:', error);
+        console.warn('Error en listener de sesiones:', error);
       });
 
+      // 4. Escuchar cambios en tiempo real en 'consultas_ia'
+      this.firestore.collection('consultas_ia').onSnapshot((snapshot) => {
+        const cloudQueries = [];
+        snapshot.forEach(doc => cloudQueries.push(doc.data()));
+        if (cloudQueries.length > 0) {
+          localStorage.setItem(DB_KEYS.AI_QUERIES, JSON.stringify(cloudQueries));
+          this.dispatchChangeEvent('ai_queries');
+        }
+      }, (error) => {
+        console.warn('Error en listener de consultas IA:', error);
+      });
+
+      return { success: true, message: '¡Sincronización exitosa con Firebase Firestore!' };
+
     } catch (err) {
-      console.warn('Error en syncWithCloud:', err);
+      console.warn('⚠️ Error en syncWithCloud:', err);
+      let userFriendlyMessage = err.message;
+      if (err.code === 'permission-denied' || (err.message && err.message.includes('permission'))) {
+        userFriendlyMessage = 'Permiso denegado por las Reglas de Seguridad de Firestore. Habilita "allow read, write: if true;" en la pestaña Reglas de Firebase.';
+      }
+      this.cloudStatus = { state: 'error', code: err.code || 'permission-denied', message: userFriendlyMessage };
+      this.dispatchChangeEvent('cloud-status');
+      return { success: false, message: userFriendlyMessage, code: err.code };
     }
   }
 
@@ -520,8 +573,59 @@ class FisioDB {
     };
   }
 
+  // ================= ASISTENTE IA & GEMINI =================
+  getGeminiApiKey() {
+    return localStorage.getItem(DB_KEYS.GEMINI_KEY) || '';
+  }
+
+  saveGeminiApiKey(key) {
+    if (key && key.trim()) {
+      localStorage.setItem(DB_KEYS.GEMINI_KEY, key.trim());
+    } else {
+      localStorage.removeItem(DB_KEYS.GEMINI_KEY);
+    }
+    this.dispatchChangeEvent('gemini-key');
+  }
+
+  getAIQueries(codigoPaciente = null) {
+    try {
+      const data = localStorage.getItem(DB_KEYS.AI_QUERIES);
+      const list = data ? JSON.parse(data) : [];
+      if (!codigoPaciente) return list;
+      const cod = codigoPaciente.trim().toUpperCase();
+      return list.filter(q => q.codigoPaciente?.trim().toUpperCase() === cod);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  saveAIQuery(queryData) {
+    const list = this.getAIQueries();
+    const newQuery = {
+      id: 'ai-' + Date.now(),
+      codigoPaciente: queryData.codigoPaciente ? queryData.codigoPaciente.trim().toUpperCase() : 'GENERAL',
+      pregunta: queryData.pregunta || '',
+      respuesta: queryData.respuesta || '',
+      promptGenerado: queryData.promptGenerado || '',
+      fecha: new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      timestamp: Date.now()
+    };
+
+    list.unshift(newQuery);
+    localStorage.setItem(DB_KEYS.AI_QUERIES, JSON.stringify(list));
+    this.dispatchChangeEvent('ai_queries');
+
+    // Sincronizar con Firestore si está conectado
+    if (this.isCloudEnabled && this.firestore) {
+      this.firestore.collection('consultas_ia').doc(newQuery.id).set(newQuery)
+        .catch(err => console.error('Error guardando consulta IA en Firestore:', err));
+    }
+
+    return newQuery;
+  }
+
   isFirebaseConnected() {
-    return this.isCloudEnabled;
+    return this.isCloudEnabled && this.cloudStatus?.state === 'connected';
   }
 
   dispatchChangeEvent(entity) {

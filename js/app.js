@@ -500,6 +500,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === modalPatientActions) closePatientActionModal();
   });
 
+  const btnActionAiConsult = document.getElementById('btn-action-ai-consult');
+  if (btnActionAiConsult) {
+    btnActionAiConsult.addEventListener('click', () => {
+      closePatientActionModal();
+      openGeminiModal(state.selectedPatientCode);
+    });
+  }
+
   btnActionNewSession.addEventListener('click', () => {
     closePatientActionModal();
     switchView('sesion', { patientCode: state.selectedPatientCode });
@@ -972,6 +980,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listado de Historial Cronológico
     renderSessionsHistory(sessions);
+
+    // Actualizar sección del Asistente IA para este paciente
+    renderEvolutionAISection(patient, sessions);
   }
 
   evolPatientSelect.addEventListener('change', () => {
@@ -1233,13 +1244,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   // ========================================================
-  // 5. MODAL DE CONFIGURACIÓN FIREBASE (FASE FINAL)
+  // 5. MODAL DE ESTADO Y SINCRONIZACIÓN FIREBASE
   // ========================================================
-  btnOpenFirebaseModal.addEventListener('click', () => {
-    const existing = window.db.getFirebaseConfig();
-    if (existing) {
-      firebaseConfigInput.value = JSON.stringify(existing, null, 2);
+  const modalDbStatusDot = document.getElementById('modal-db-status-dot');
+  const modalDbStatusText = document.getElementById('modal-db-status-text');
+  const btnForceSyncFirebase = document.getElementById('btn-force-sync-firebase');
+
+  function updateCloudStatusUI() {
+    const status = window.db ? window.db.cloudStatus : { state: 'local' };
+    const labelDbStatus = document.getElementById('label-db-status');
+
+    if (status && status.state === 'connected') {
+      if (modalDbStatusDot) modalDbStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+      if (modalDbStatusText) {
+        modalDbStatusText.textContent = "Conectado y sincronizado en tiempo real";
+        modalDbStatusText.className = "text-xs font-bold text-emerald-800";
+      }
+      if (labelDbStatus) labelDbStatus.textContent = "Firebase Conectado";
+    } else if (status && status.state === 'error') {
+      if (modalDbStatusDot) modalDbStatusDot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
+      if (modalDbStatusText) {
+        modalDbStatusText.textContent = "Atención: Falta habilitar 'Reglas' en Firebase";
+        modalDbStatusText.className = "text-xs font-bold text-amber-800";
+      }
+      if (labelDbStatus) labelDbStatus.textContent = "Reglas Firebase Pendientes";
+    } else {
+      if (modalDbStatusDot) modalDbStatusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-600";
+      if (modalDbStatusText) {
+        modalDbStatusText.textContent = "Modo Clínico Local (Offline)";
+        modalDbStatusText.className = "text-xs font-bold text-primary";
+      }
+      if (labelDbStatus) labelDbStatus.textContent = "Modo Clínico Local";
     }
+  }
+
+  btnOpenFirebaseModal.addEventListener('click', () => {
+    updateCloudStatusUI();
     modalFirebase.classList.remove('hidden');
     modalFirebase.classList.add('flex');
   });
@@ -1255,22 +1295,439 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === modalFirebase) closeFirebaseModal();
   });
 
-  btnSaveFirebase.addEventListener('click', () => {
-    const raw = firebaseConfigInput.value.trim();
-    if (!raw) {
-      showToast('Por favor introduce la configuración JSON de Firebase', 'error');
+  if (btnForceSyncFirebase) {
+    btnForceSyncFirebase.addEventListener('click', async () => {
+      btnForceSyncFirebase.disabled = true;
+      btnForceSyncFirebase.innerHTML = `
+        <div class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <span>Sincronizando con Firebase...</span>
+      `;
+
+      try {
+        const result = await window.db.syncWithCloud(true);
+        if (result.success) {
+          showToast(result.message, 'success');
+        } else {
+          showToast(result.message, 'error');
+        }
+      } catch (e) {
+        showToast(e.message || 'Error al sincronizar con Firebase', 'error');
+      } finally {
+        btnForceSyncFirebase.disabled = false;
+        btnForceSyncFirebase.innerHTML = `
+          <span class="material-symbols-outlined text-[18px]">sync</span>
+          <span>🔄 Subir y Sincronizar Datos con Firebase Ahora</span>
+        `;
+        updateCloudStatusUI();
+      }
+    });
+  }
+
+
+  // ========================================================
+  // 6. ASISTENTE CLÍNICO IA & GEMINI
+  // ========================================================
+  const btnEvolGeneratePrompts = document.getElementById('btn-evol-generate-prompts');
+  const btnEvolOpenAiChat = document.getElementById('btn-evol-open-ai-chat');
+  const evolPromptsContainer = document.getElementById('evol-prompts-container');
+  const evolPromptsList = document.getElementById('evol-prompts-list');
+  const btnToggleAiHistory = document.getElementById('btn-toggle-ai-history');
+  const evolAiQueriesList = document.getElementById('evol-ai-queries-list');
+  const evolAiQueriesCount = document.getElementById('evol-ai-queries-count');
+  const iconToggleAiHistory = document.getElementById('icon-toggle-ai-history');
+  const badgeEvolAiStatus = document.getElementById('badge-evol-ai-status');
+
+  function renderEvolutionAISection(patient, sessions = []) {
+    if (!patient) return;
+    const hasKey = window.gemini && window.gemini.hasApiKey();
+
+    if (badgeEvolAiStatus) {
+      if (hasKey) {
+        badgeEvolAiStatus.textContent = 'Gemini Conectado';
+        badgeEvolAiStatus.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
+      } else {
+        badgeEvolAiStatus.textContent = 'API Key Pendiente';
+        badgeEvolAiStatus.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300';
+      }
+    }
+
+    const queries = window.db ? window.db.getAIQueries(patient.codigo) : [];
+    if (evolAiQueriesCount) evolAiQueriesCount.textContent = queries.length;
+
+    renderEvolSavedQueries(queries);
+  }
+
+  function renderEvolSavedQueries(queries) {
+    if (!evolAiQueriesList) return;
+    evolAiQueriesList.innerHTML = '';
+
+    if (queries.length === 0) {
+      evolAiQueriesList.innerHTML = `
+        <p class="text-[11px] text-outline text-center py-2 bg-surface-container-low rounded-lg">
+          Aún no hay preguntas ni respuestas guardadas para este paciente.
+        </p>
+      `;
       return;
     }
-    try {
-      const parsed = JSON.parse(raw);
-      window.db.saveFirebaseConfig(parsed);
-      labelDbStatus.textContent = 'Conectado a Firebase';
-      closeFirebaseModal();
-      showToast('¡Configuración de Firebase guardada exitosamente!', 'success');
-    } catch (e) {
-      showToast('El formato ingresado no es un JSON válido', 'error');
+
+    queries.forEach(q => {
+      const card = document.createElement('div');
+      card.className = "bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/30 space-y-1.5 shadow-xs";
+      card.innerHTML = `
+        <div class="flex items-center justify-between text-[10px] text-secondary">
+          <span class="font-bold flex items-center gap-1">
+            <span class="material-symbols-outlined text-[13px] text-amber-600">psychology</span>
+            Pregunta al Asistente IA
+          </span>
+          <span class="font-mono-code">${escapeHtml(q.fecha)}</span>
+        </div>
+        <p class="text-xs font-semibold text-on-surface">${escapeHtml(q.pregunta)}</p>
+        <div class="bg-surface-container-low p-2 rounded-lg text-[11px] text-on-surface-variant leading-relaxed">
+          ${window.gemini ? window.gemini.formatMarkdown(q.respuesta) : escapeHtml(q.respuesta)}
+        </div>
+      `;
+      evolAiQueriesList.appendChild(card);
+    });
+  }
+
+  if (btnToggleAiHistory) {
+    btnToggleAiHistory.addEventListener('click', () => {
+      const isHidden = evolAiQueriesList.classList.contains('hidden');
+      if (isHidden) {
+        evolAiQueriesList.classList.remove('hidden');
+        iconToggleAiHistory.textContent = 'expand_less';
+      } else {
+        evolAiQueriesList.classList.add('hidden');
+        iconToggleAiHistory.textContent = 'expand_more';
+      }
+    });
+  }
+
+  if (btnEvolGeneratePrompts) {
+    btnEvolGeneratePrompts.addEventListener('click', () => {
+      const patient = window.db.getPatient(state.selectedPatientCode);
+      const sessions = window.db.getSessionsByPatient(state.selectedPatientCode);
+      const prompts = window.gemini.generatePromptsForPatient(patient, sessions);
+
+      evolPromptsList.innerHTML = '';
+      prompts.forEach((p, idx) => {
+        const item = document.createElement('div');
+        item.className = "bg-surface-container-lowest p-3 rounded-xl border border-emerald-300 shadow-xs space-y-2";
+        item.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-primary">${escapeHtml(p.titulo)}</span>
+            <span class="text-[10px] font-mono-code bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Prompt #${idx+1}</span>
+          </div>
+          <p class="text-xs text-on-surface leading-relaxed bg-surface-bright/70 p-2 rounded-lg border border-outline-variant/30 font-medium">
+            "${escapeHtml(p.prompt)}"
+          </p>
+          <div class="flex gap-2 justify-end pt-1">
+            <button type="button" class="btn-copy-prompt-item px-3 py-1 bg-surface-container-low hover:bg-surface-container text-primary text-xs font-bold rounded-lg flex items-center gap-1 active:scale-95 transition-all">
+              <span class="material-symbols-outlined text-[15px]">content_copy</span>
+              <span>Copiar</span>
+            </button>
+            <button type="button" class="btn-ask-prompt-item px-3 py-1 bg-primary-container text-white text-xs font-bold rounded-lg flex items-center gap-1 hover:bg-primary active:scale-95 transition-all shadow-xs">
+              <span class="material-symbols-outlined text-[15px]">chat</span>
+              <span>Consultar a Gemini</span>
+            </button>
+          </div>
+        `;
+
+        item.querySelector('.btn-copy-prompt-item').addEventListener('click', () => {
+          navigator.clipboard.writeText(p.prompt);
+          showToast('¡Prompt copiado al portapapeles!', 'success');
+        });
+
+        item.querySelector('.btn-ask-prompt-item').addEventListener('click', () => {
+          openGeminiModal(state.selectedPatientCode, p.prompt);
+        });
+
+        evolPromptsList.appendChild(item);
+      });
+
+      evolPromptsContainer.classList.remove('hidden');
+      showToast('¡3 Prompts clínicos generados para este paciente!', 'success');
+    });
+  }
+
+  if (btnEvolOpenAiChat) {
+    btnEvolOpenAiChat.addEventListener('click', () => {
+      openGeminiModal(state.selectedPatientCode);
+    });
+  }
+
+  // --- Modal Gemini Assistant ---
+  const modalGeminiAssistant = document.getElementById('modal-gemini-assistant');
+  const btnOpenGeminiModal = document.getElementById('btn-open-gemini-modal');
+  const btnCloseGeminiModal = document.getElementById('btn-close-gemini-modal');
+  const geminiApiKeyInput = document.getElementById('gemini-api-key-input');
+  const btnToggleKeyVisibility = document.getElementById('btn-toggle-key-visibility');
+  const btnSaveGeminiKey = document.getElementById('btn-save-gemini-key');
+  const btnTestGeminiKey = document.getElementById('btn-test-gemini-key');
+  const geminiKeyStatusBadge = document.getElementById('gemini-key-status-badge');
+  const aiPatientSelect = document.getElementById('ai-patient-select');
+  const aiPatientSummary = document.getElementById('ai-patient-summary');
+  const btnAiGenerate3Prompts = document.getElementById('btn-ai-generate-3-prompts');
+  const aiPromptsCardsContainer = document.getElementById('ai-prompts-cards-container');
+  const aiCustomPromptInput = document.getElementById('ai-custom-prompt-input');
+  const btnSendGeminiQuery = document.getElementById('btn-send-gemini-query');
+  const aiQueryLoading = document.getElementById('ai-query-loading');
+  const aiResponseCard = document.getElementById('ai-response-card');
+  const aiResponseText = document.getElementById('ai-response-text');
+  const btnCopyAiResponse = document.getElementById('btn-copy-ai-response');
+  const modalAiHistoryList = document.getElementById('modal-ai-history-list');
+  const modalAiHistoryCount = document.getElementById('modal-ai-history-count');
+
+  function openGeminiModal(patientCode = null, prefilledPrompt = '') {
+    const allPatients = window.db.getPatients();
+    const activeCode = patientCode || state.selectedPatientCode || (allPatients[0]?.codigo);
+
+    if (aiPatientSelect) {
+      aiPatientSelect.innerHTML = '';
+      allPatients.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.codigo;
+        opt.textContent = `${p.codigo} - ${p.diagnostico}`;
+        if (p.codigo === activeCode) opt.selected = true;
+        aiPatientSelect.appendChild(opt);
+      });
     }
-  });
+
+    updateAiPatientInfo(activeCode);
+
+    const existingKey = window.gemini ? window.gemini.getApiKey() : '';
+    if (geminiApiKeyInput) {
+      geminiApiKeyInput.value = existingKey;
+    }
+    updateGeminiKeyBadge(Boolean(existingKey));
+
+    if (prefilledPrompt && aiCustomPromptInput) {
+      aiCustomPromptInput.value = prefilledPrompt;
+    }
+
+    renderModalAiHistory(activeCode);
+
+    if (modalGeminiAssistant) {
+      modalGeminiAssistant.classList.remove('hidden');
+      modalGeminiAssistant.classList.add('flex');
+    }
+  }
+
+  function closeGeminiModal() {
+    if (modalGeminiAssistant) {
+      modalGeminiAssistant.classList.add('hidden');
+      modalGeminiAssistant.classList.remove('flex');
+    }
+  }
+
+  if (btnOpenGeminiModal) btnOpenGeminiModal.addEventListener('click', () => openGeminiModal());
+  if (btnCloseGeminiModal) btnCloseGeminiModal.addEventListener('click', closeGeminiModal);
+  if (modalGeminiAssistant) {
+    modalGeminiAssistant.addEventListener('click', (e) => {
+      if (e.target === modalGeminiAssistant) closeGeminiModal();
+    });
+  }
+
+  function updateAiPatientInfo(code) {
+    const patient = window.db.getPatient(code);
+    if (patient && aiPatientSummary) {
+      aiPatientSummary.textContent = `${patient.codigo} • ${patient.diagnostico} (${patient.zona}) • Dolor: ${patient.ultimoDolor}/10`;
+    }
+  }
+
+  if (aiPatientSelect) {
+    aiPatientSelect.addEventListener('change', () => {
+      updateAiPatientInfo(aiPatientSelect.value);
+      renderModalAiHistory(aiPatientSelect.value);
+    });
+  }
+
+  function updateGeminiKeyBadge(hasKey) {
+    if (!geminiKeyStatusBadge) return;
+    if (hasKey) {
+      geminiKeyStatusBadge.textContent = '🟢 Clave Guardada';
+      geminiKeyStatusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300';
+    } else {
+      geminiKeyStatusBadge.textContent = '🟡 Sin Clave Guardada';
+      geminiKeyStatusBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300';
+    }
+  }
+
+  if (btnToggleKeyVisibility) {
+    btnToggleKeyVisibility.addEventListener('click', () => {
+      const isPassword = geminiApiKeyInput.type === 'password';
+      geminiApiKeyInput.type = isPassword ? 'text' : 'password';
+      btnToggleKeyVisibility.querySelector('.material-symbols-outlined').textContent = isPassword ? 'visibility_off' : 'visibility';
+    });
+  }
+
+  if (btnSaveGeminiKey) {
+    btnSaveGeminiKey.addEventListener('click', () => {
+      const key = geminiApiKeyInput.value.trim();
+      if (!key) {
+        showToast('Escribe o pega tu clave de Gemini API', 'error');
+        return;
+      }
+      window.gemini.setApiKey(key);
+      updateGeminiKeyBadge(true);
+      showToast('¡API Key de Gemini guardada de forma segura en tu navegador!', 'success');
+    });
+  }
+
+  if (btnTestGeminiKey) {
+    btnTestGeminiKey.addEventListener('click', async () => {
+      const key = geminiApiKeyInput.value.trim() || window.gemini.getApiKey();
+      if (!key) {
+        showToast('Primero ingresa tu API Key de Gemini', 'error');
+        return;
+      }
+      btnTestGeminiKey.disabled = true;
+      btnTestGeminiKey.textContent = 'Probando...';
+      const result = await window.gemini.testConnection(key);
+      btnTestGeminiKey.disabled = false;
+      btnTestGeminiKey.textContent = 'Probar';
+
+      if (result.success) {
+        updateGeminiKeyBadge(true);
+        showToast(result.message, 'success');
+      } else {
+        showToast(result.message, 'error');
+      }
+    });
+  }
+
+  if (btnAiGenerate3Prompts) {
+    btnAiGenerate3Prompts.addEventListener('click', () => {
+      const selectedCode = aiPatientSelect ? aiPatientSelect.value : state.selectedPatientCode;
+      const patient = window.db.getPatient(selectedCode);
+      const sessions = window.db.getSessionsByPatient(selectedCode);
+      const prompts = window.gemini.generatePromptsForPatient(patient, sessions);
+
+      aiPromptsCardsContainer.innerHTML = '';
+      prompts.forEach((p, idx) => {
+        const card = document.createElement('div');
+        card.className = "bg-surface-container-low p-3 rounded-xl border border-outline-variant/40 space-y-2";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-primary">${escapeHtml(p.titulo)}</span>
+            <span class="text-[10px] font-mono-code bg-secondary-container text-primary font-bold px-2 py-0.5 rounded-full">Sugerencia #${idx+1}</span>
+          </div>
+          <p class="text-xs text-on-surface leading-relaxed">
+            "${escapeHtml(p.prompt)}"
+          </p>
+          <div class="flex gap-2 justify-end pt-1">
+            <button type="button" class="btn-modal-copy-prompt px-3 py-1 bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/40 text-on-surface text-xs font-semibold rounded-lg flex items-center gap-1 active:scale-95 transition-all">
+              <span class="material-symbols-outlined text-[14px]">content_copy</span>
+              <span>Copiar</span>
+            </button>
+            <button type="button" class="btn-modal-use-prompt px-3 py-1 bg-primary-container text-white text-xs font-bold rounded-lg flex items-center gap-1 hover:bg-primary active:scale-95 transition-all shadow-xs">
+              <span class="material-symbols-outlined text-[14px]">edit_note</span>
+              <span>Cargar en Consulta</span>
+            </button>
+          </div>
+        `;
+
+        card.querySelector('.btn-modal-copy-prompt').addEventListener('click', () => {
+          navigator.clipboard.writeText(p.prompt);
+          showToast('¡Prompt copiado al portapapeles!', 'success');
+        });
+
+        card.querySelector('.btn-modal-use-prompt').addEventListener('click', () => {
+          aiCustomPromptInput.value = p.prompt;
+          aiCustomPromptInput.focus();
+          aiCustomPromptInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+
+        aiPromptsCardsContainer.appendChild(card);
+      });
+
+      showToast('¡3 Prompts generados y adaptados para este paciente!', 'success');
+    });
+  }
+
+  if (btnSendGeminiQuery) {
+    btnSendGeminiQuery.addEventListener('click', async () => {
+      const promptText = aiCustomPromptInput.value.trim();
+      if (!promptText) {
+        showToast('Escribe una consulta o selecciona un prompt primero', 'error');
+        aiCustomPromptInput.focus();
+        return;
+      }
+
+      if (!window.gemini.hasApiKey()) {
+        showToast('Por favor guarda tu API Key de Gemini en el recuadro superior', 'error');
+        geminiApiKeyInput.focus();
+        return;
+      }
+
+      const selectedCode = aiPatientSelect ? aiPatientSelect.value : state.selectedPatientCode;
+      const patient = window.db.getPatient(selectedCode);
+
+      btnSendGeminiQuery.disabled = true;
+      aiQueryLoading.classList.remove('hidden');
+      aiResponseCard.classList.add('hidden');
+
+      try {
+        const responseText = await window.gemini.askGemini(promptText, patient);
+        aiResponseText.innerHTML = window.gemini.formatMarkdown(responseText);
+        aiResponseCard.classList.remove('hidden');
+        showToast('¡Respuesta recibida y guardada en la base de datos!', 'success');
+
+        renderModalAiHistory(selectedCode);
+        if (state.currentView === 'evolucion') {
+          renderEvolutionAISection(patient);
+        }
+      } catch (err) {
+        showToast(err.message || 'Error al consultar con Gemini', 'error');
+      } finally {
+        btnSendGeminiQuery.disabled = false;
+        aiQueryLoading.classList.add('hidden');
+      }
+    });
+  }
+
+  if (btnCopyAiResponse) {
+    btnCopyAiResponse.addEventListener('click', () => {
+      const textToCopy = aiResponseText.innerText || aiResponseText.textContent;
+      navigator.clipboard.writeText(textToCopy);
+      showToast('¡Respuesta de Gemini copiada!', 'success');
+    });
+  }
+
+  function renderModalAiHistory(patientCode) {
+    if (!modalAiHistoryList) return;
+    const queries = window.db ? window.db.getAIQueries(patientCode) : [];
+    if (modalAiHistoryCount) modalAiHistoryCount.textContent = `${queries.length} consulta${queries.length === 1 ? '' : 's'}`;
+
+    modalAiHistoryList.innerHTML = '';
+    if (queries.length === 0) {
+      modalAiHistoryList.innerHTML = `
+        <p class="text-[11px] text-outline text-center py-3 bg-surface-container-low rounded-lg">
+          No hay preguntas guardadas para este paciente todavía.
+        </p>
+      `;
+      return;
+    }
+
+    queries.forEach(q => {
+      const item = document.createElement('div');
+      item.className = "bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/30 space-y-1.5";
+      item.innerHTML = `
+        <div class="flex items-center justify-between text-[10px] text-secondary">
+          <span class="font-bold flex items-center gap-1">
+            <span class="material-symbols-outlined text-[13px] text-amber-600">psychology</span>
+            ${escapeHtml(q.codigoPaciente)}
+          </span>
+          <span class="font-mono-code">${escapeHtml(q.fecha)}</span>
+        </div>
+        <p class="text-xs font-semibold text-on-surface">${escapeHtml(q.pregunta)}</p>
+        <div class="bg-surface-container-lowest p-2 rounded-lg text-[11px] text-on-surface-variant leading-relaxed">
+          ${window.gemini ? window.gemini.formatMarkdown(q.respuesta) : escapeHtml(q.respuesta)}
+        </div>
+      `;
+      modalAiHistoryList.appendChild(item);
+    });
+  }
 
 
   // ========================================================
