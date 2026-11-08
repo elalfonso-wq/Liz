@@ -12,16 +12,22 @@ document.addEventListener('DOMContentLoaded', () => {
   // ESTADO GLOBAL DE LA APLICACIÓN
   // ==========================================
   const state = {
-    currentView: 'pacientes', // 'pacientes' | 'sesion' | 'evolucion'
+    currentView: 'pacientes', // 'pacientes' | 'citas' | 'sesion' | 'plan' | 'evolucion'
     selectedPatientCode: 'PAC-842', // Paciente activo por defecto
     currentFilter: 'all',          // 'all' | 'mild' | 'moderate' | 'severe'
     searchQuery: '',
+    currentAptFilter: 'todas',     // 'todas' | 'programada' | 'completada'
     
     // Estado del formulario de nueva sesión
     newSession: {
       patientCode: 'PAC-842',
       date: new Date().toISOString().split('T')[0],
       painScore: 4,
+      painType: 'Sordo / Mecánico (Sobrecarga)',
+      painTiming: 'Durante la carga / ejercicio',
+      loadTolerance: 'adecuada',
+      redFlags: 'ninguna',
+      clinicalReasoning: '',
       exercises: [],
       notes: ''
     }
@@ -29,12 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Presets comunes de ejercicios fisioterapéuticos
   const EXERCISE_PRESETS = [
-    { nombre: 'Isometría en pared', series: 3, repeticiones: '35 seg', notas: 'Cadena cinética cerrada' },
-    { nombre: 'Puente de glúteos', series: 3, repeticiones: '12 reps', notas: 'Activación posterior' },
-    { nombre: 'Sentadilla con apoyo', series: 3, repeticiones: '10 reps', notas: 'Rango libre de dolor' },
-    { nombre: 'Elevación de talones', series: 3, repeticiones: '15 reps', notas: 'Fase excéntrica lenta' },
-    { nombre: 'Plancha corta de core', series: 3, repeticiones: '20 seg', notas: 'Control lumbo-pélvico' },
-    { nombre: 'Movilidad activa guiada', series: 2, repeticiones: '10 reps', notas: 'Sin rebotes' }
+    { nombre: 'Isometría en pared', series: 3, repeticiones: '35 seg', carga: 'Autocarga', descanso: '60 seg', notas: 'Cadena cinética cerrada' },
+    { nombre: 'Puente de glúteos', series: 3, repeticiones: '12 reps', carga: 'Autocarga', descanso: '45 seg', notas: 'Activación posterior' },
+    { nombre: 'Sentadilla con apoyo', series: 3, repeticiones: '10 reps', carga: 'Mancuerna 4 kg', descanso: '60 seg', notas: 'Rango libre de dolor' },
+    { nombre: 'Elevación de talones', series: 3, repeticiones: '15 reps', carga: 'Banda elástica media', descanso: '45 seg', notas: 'Fase excéntrica lenta' },
+    { nombre: 'Plancha corta de core', series: 3, repeticiones: '20 seg', carga: 'Autocarga', descanso: '30 seg', notas: 'Control lumbo-pélvico' },
+    { nombre: 'Movilidad activa guiada', series: 2, repeticiones: '10 reps', carga: 'Sin carga', descanso: '30 seg', notas: 'Sin rebotes' }
   ];
 
   // ==========================================
@@ -42,15 +48,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================
   // Vistas
   const viewPacientes = document.getElementById('view-pacientes');
+  const viewCitas = document.getElementById('view-citas');
   const viewSesion = document.getElementById('view-sesion');
+  const viewPlan = document.getElementById('view-plan');
   const viewEvolucion = document.getElementById('view-evolucion');
 
   // Cabecera y Navegación
   const btnHeaderBack = document.getElementById('btn-header-back');
   const tabNavPacientes = document.getElementById('tab-nav-pacientes');
+  const tabNavCitas = document.getElementById('tab-nav-citas');
   const tabNavSesion = document.getElementById('tab-nav-sesion');
+  const tabNavPlan = document.getElementById('tab-nav-plan');
   const tabNavEvolucion = document.getElementById('tab-nav-evolucion');
-  const navTabs = [tabNavPacientes, tabNavSesion, tabNavEvolucion];
+  const navTabs = [tabNavPacientes, tabNavCitas, tabNavSesion, tabNavPlan, tabNavEvolucion];
 
   // Directorio de Pacientes
   const patientListContainer = document.getElementById('patient-list-container');
@@ -157,40 +167,71 @@ document.addEventListener('DOMContentLoaded', () => {
   function switchView(viewName, params = {}) {
     state.currentView = viewName;
 
-    // Ocultar todas las vistas
-    viewPacientes.classList.add('hidden');
-    viewSesion.classList.add('hidden');
-    viewEvolucion.classList.add('hidden');
+    // Ocultar todas las 5 vistas
+    if (viewPacientes) viewPacientes.classList.add('hidden');
+    if (viewCitas) viewCitas.classList.add('hidden');
+    if (viewSesion) viewSesion.classList.add('hidden');
+    if (viewPlan) viewPlan.classList.add('hidden');
+    if (viewEvolucion) viewEvolucion.classList.add('hidden');
 
     // Resetear estilos de tabs inferiores
     navTabs.forEach(tab => {
-      tab.className = "nav-tab flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-4 py-1.5 transition-colors active:scale-95";
+      if (!tab) return;
+      tab.className = "nav-tab flex-1 flex flex-col items-center justify-center text-on-surface-variant hover:text-primary rounded-xl py-1 transition-colors active:scale-95";
       const icon = tab.querySelector('.material-symbols-outlined');
       if (icon) icon.classList.remove('icon-fill');
     });
 
+    const activeTabClass = "nav-tab flex-1 flex flex-col items-center justify-center text-primary bg-secondary-container/40 rounded-xl py-1 transition-all active:scale-95";
+
     // Gestionar botón de retorno en cabecera
     if (viewName === 'pacientes') {
       btnHeaderBack.classList.add('hidden');
-      viewPacientes.classList.remove('hidden');
-      tabNavPacientes.className = "nav-tab flex flex-col items-center justify-center text-primary bg-secondary-container/40 rounded-xl px-4 py-1.5 transition-all active:scale-95";
-      tabNavPacientes.querySelector('.material-symbols-outlined').classList.add('icon-fill');
+      if (viewPacientes) viewPacientes.classList.remove('hidden');
+      if (tabNavPacientes) {
+        tabNavPacientes.className = activeTabClass;
+        tabNavPacientes.querySelector('.material-symbols-outlined')?.classList.add('icon-fill');
+      }
       renderPatients();
+    } else if (viewName === 'citas') {
+      btnHeaderBack.classList.remove('hidden');
+      if (viewCitas) viewCitas.classList.remove('hidden');
+      if (tabNavCitas) {
+        tabNavCitas.className = activeTabClass;
+        tabNavCitas.querySelector('.material-symbols-outlined')?.classList.add('icon-fill');
+      }
+      renderAppointmentsView();
     } else if (viewName === 'sesion') {
       btnHeaderBack.classList.remove('hidden');
-      viewSesion.classList.remove('hidden');
-      tabNavSesion.className = "nav-tab flex flex-col items-center justify-center text-primary bg-secondary-container/40 rounded-xl px-4 py-1.5 transition-all active:scale-95";
-      tabNavSesion.querySelector('.material-symbols-outlined').classList.add('icon-fill');
+      if (viewSesion) viewSesion.classList.remove('hidden');
+      if (tabNavSesion) {
+        tabNavSesion.className = activeTabClass;
+        tabNavSesion.querySelector('.material-symbols-outlined')?.classList.add('icon-fill');
+      }
 
       if (params.patientCode) {
         state.selectedPatientCode = params.patientCode;
       }
       prepareSessionForm(state.selectedPatientCode, params.preloadedExercises);
+    } else if (viewName === 'plan') {
+      btnHeaderBack.classList.remove('hidden');
+      if (viewPlan) viewPlan.classList.remove('hidden');
+      if (tabNavPlan) {
+        tabNavPlan.className = activeTabClass;
+        tabNavPlan.querySelector('.material-symbols-outlined')?.classList.add('icon-fill');
+      }
+
+      if (params.patientCode) {
+        state.selectedPatientCode = params.patientCode;
+      }
+      renderPlanView(state.selectedPatientCode);
     } else if (viewName === 'evolucion') {
       btnHeaderBack.classList.remove('hidden');
-      viewEvolucion.classList.remove('hidden');
-      tabNavEvolucion.className = "nav-tab flex flex-col items-center justify-center text-primary bg-secondary-container/40 rounded-xl px-4 py-1.5 transition-all active:scale-95";
-      tabNavEvolucion.querySelector('.material-symbols-outlined').classList.add('icon-fill');
+      if (viewEvolucion) viewEvolucion.classList.remove('hidden');
+      if (tabNavEvolucion) {
+        tabNavEvolucion.className = activeTabClass;
+        tabNavEvolucion.querySelector('.material-symbols-outlined')?.classList.add('icon-fill');
+      }
 
       if (params.patientCode) {
         state.selectedPatientCode = params.patientCode;
@@ -203,10 +244,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Eventos de tabs inferiores
-  tabNavPacientes.addEventListener('click', () => switchView('pacientes'));
-  tabNavSesion.addEventListener('click', () => switchView('sesion'));
-  tabNavEvolucion.addEventListener('click', () => switchView('evolucion'));
-  btnHeaderBack.addEventListener('click', () => switchView('pacientes'));
+  if (tabNavPacientes) tabNavPacientes.addEventListener('click', () => switchView('pacientes'));
+  if (tabNavCitas) tabNavCitas.addEventListener('click', () => switchView('citas'));
+  if (tabNavSesion) tabNavSesion.addEventListener('click', () => switchView('sesion'));
+  if (tabNavPlan) tabNavPlan.addEventListener('click', () => switchView('plan'));
+  if (tabNavEvolucion) tabNavEvolucion.addEventListener('click', () => switchView('evolucion'));
+  if (btnHeaderBack) btnHeaderBack.addEventListener('click', () => switchView('pacientes'));
 
   // ==========================================
   // HELPERS DE ESCALA EVA DE DOLOR (0 al 10)
@@ -508,6 +551,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const btnActionScheduleApt = document.getElementById('btn-action-schedule-apt');
+  if (btnActionScheduleApt) {
+    btnActionScheduleApt.addEventListener('click', () => {
+      closePatientActionModal();
+      openAppointmentModal(state.selectedPatientCode);
+    });
+  }
+
+  const btnActionViewPlan = document.getElementById('btn-action-view-plan');
+  if (btnActionViewPlan) {
+    btnActionViewPlan.addEventListener('click', () => {
+      closePatientActionModal();
+      switchView('plan', { patientCode: state.selectedPatientCode });
+    });
+  }
+
   btnActionNewSession.addEventListener('click', () => {
     closePatientActionModal();
     switchView('sesion', { patientCode: state.selectedPatientCode });
@@ -752,11 +811,35 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
 
+        <!-- Carga y Descanso entre series -->
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <div class="bg-surface-container-low p-2 rounded-lg border border-outline-variant/30">
+            <span class="text-[10px] text-outline block">Carga / Resistencia</span>
+            <input 
+              type="text" 
+              placeholder="Ej. Autocarga, 4 kg, Banda media..." 
+              value="${escapeHtml(ex.carga || 'Autocarga')}" 
+              data-idx="${idx}" 
+              class="ex-load-input font-mono-code font-bold text-xs text-primary bg-transparent border-0 p-0 focus:ring-0 outline-none w-full"
+            />
+          </div>
+          <div class="bg-surface-container-low p-2 rounded-lg border border-outline-variant/30">
+            <span class="text-[10px] text-outline block">Descanso entre series</span>
+            <input 
+              type="text" 
+              placeholder="Ej. 60 seg" 
+              value="${escapeHtml(ex.descanso || '60 seg')}" 
+              data-idx="${idx}" 
+              class="ex-rest-input font-mono-code font-bold text-xs text-on-surface bg-transparent border-0 p-0 focus:ring-0 outline-none w-full"
+            />
+          </div>
+        </div>
+
         <!-- Notas / Criterio técnico del ejercicio -->
         <div>
           <input 
             type="text" 
-            placeholder="Criterio técnico (ej. Sin dolor agudo, ritmo 3-1-1)..." 
+            placeholder="Criterio técnico (ej. Sin dolor agudo, ritmo excéntrico 3-1-1)..." 
             value="${escapeHtml(ex.notas || '')}" 
             data-idx="${idx}" 
             class="ex-notes-input w-full bg-surface-bright/70 border border-outline-variant/40 rounded-md px-2.5 py-1 text-[11px] text-on-surface-variant focus:border-primary-container outline-none"
@@ -785,7 +868,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (action === 'dec-series') {
           ex.series = Math.max(1, (ex.series || 1) - 1);
         } else if (action === 'inc-reps') {
-          // Intentar parsear número en repeticiones
           const num = parseInt(ex.repeticiones, 10);
           if (!isNaN(num)) {
             const unit = ex.repeticiones.replace(/[0-9]/g, '').trim() || 'reps';
@@ -807,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    // Inputs de texto de nombre, repeticiones y notas
+    // Inputs de texto de nombre, repeticiones, carga, descanso y notas
     sessionExercisesList.querySelectorAll('.ex-name-input').forEach(inp => {
       inp.addEventListener('change', (e) => {
         const idx = parseInt(e.target.dataset.idx, 10);
@@ -819,6 +901,20 @@ document.addEventListener('DOMContentLoaded', () => {
       inp.addEventListener('change', (e) => {
         const idx = parseInt(e.target.dataset.idx, 10);
         if (state.newSession.exercises[idx]) state.newSession.exercises[idx].repeticiones = e.target.value.trim();
+      });
+    });
+
+    sessionExercisesList.querySelectorAll('.ex-load-input').forEach(inp => {
+      inp.addEventListener('change', (e) => {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        if (state.newSession.exercises[idx]) state.newSession.exercises[idx].carga = e.target.value.trim();
+      });
+    });
+
+    sessionExercisesList.querySelectorAll('.ex-rest-input').forEach(inp => {
+      inp.addEventListener('change', (e) => {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        if (state.newSession.exercises[idx]) state.newSession.exercises[idx].descanso = e.target.value.trim();
       });
     });
 
@@ -852,6 +948,8 @@ document.addEventListener('DOMContentLoaded', () => {
           nombre: preset.nombre,
           series: preset.series,
           repeticiones: preset.repeticiones,
+          carga: preset.carga || 'Autocarga',
+          descanso: preset.descanso || '60 seg',
           notas: preset.notas
         });
         renderSessionExercises();
@@ -873,6 +971,8 @@ document.addEventListener('DOMContentLoaded', () => {
       nombre: name,
       series: 3,
       repeticiones: '10 reps',
+      carga: 'Autocarga',
+      descanso: '60 seg',
       notas: 'Ejecución técnica controlada'
     });
 
@@ -895,10 +995,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const patientCode = sessionPatientSelect.value;
+    const painTypeEl = document.getElementById('session-input-pain-type');
+    const painTimingEl = document.getElementById('session-input-pain-timing');
+    const loadToleranceEl = document.getElementById('session-input-load-tolerance');
+    const redFlagsEl = document.getElementById('session-input-red-flags');
+    const clinicalReasoningEl = document.getElementById('session-input-clinical-reasoning');
+
     const sessionPayload = {
       codigoPaciente: patientCode,
       fecha: sessionInputDate.value || new Date().toISOString().split('T')[0],
       nivelDolor: state.newSession.painScore,
+      tipoDolor: painTypeEl ? painTypeEl.value : 'Sordo / Mecánico (Sobrecarga)',
+      momentoDolor: painTimingEl ? painTimingEl.value : 'Durante la carga / ejercicio',
+      toleranciaCarga: loadToleranceEl ? loadToleranceEl.value : 'adecuada',
+      banderaAlerta: redFlagsEl ? redFlagsEl.value : 'ninguna',
+      criterioClinicoSesion: clinicalReasoningEl ? clinicalReasoningEl.value.trim() : '',
       ejercicios: state.newSession.exercises,
       notas: sessionInputNotes.value.trim()
     };
@@ -1439,7 +1550,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         item.querySelector('.btn-ask-prompt-item').addEventListener('click', () => {
-          openGeminiModal(state.selectedPatientCode, p.prompt);
+          openGeminiModal(state.selectedPatientCode, p.prompt, true);
         });
 
         evolPromptsList.appendChild(item);
@@ -1478,7 +1589,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalAiHistoryList = document.getElementById('modal-ai-history-list');
   const modalAiHistoryCount = document.getElementById('modal-ai-history-count');
 
-  function openGeminiModal(patientCode = null, prefilledPrompt = '') {
+  function openGeminiModal(patientCode = null, prefilledPrompt = '', autoSend = false) {
     const allPatients = window.db.getPatients();
     const activeCode = patientCode || state.selectedPatientCode || (allPatients[0]?.codigo);
 
@@ -1510,6 +1621,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modalGeminiAssistant) {
       modalGeminiAssistant.classList.remove('hidden');
       modalGeminiAssistant.classList.add('flex');
+    }
+
+    if (autoSend && prefilledPrompt && btnSendGeminiQuery) {
+      setTimeout(() => {
+        btnSendGeminiQuery.click();
+      }, 150);
     }
   }
 
@@ -1654,34 +1771,55 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      if (!window.gemini.hasApiKey()) {
-        showToast('Por favor guarda tu API Key de Gemini en el recuadro superior', 'error');
-        geminiApiKeyInput.focus();
-        return;
-      }
-
       const selectedCode = aiPatientSelect ? aiPatientSelect.value : state.selectedPatientCode;
-      const patient = window.db.getPatient(selectedCode);
+      const patient = window.db ? window.db.getPatient(selectedCode) : null;
 
       btnSendGeminiQuery.disabled = true;
       aiQueryLoading.classList.remove('hidden');
       aiResponseCard.classList.add('hidden');
 
       try {
-        const responseText = await window.gemini.askGemini(promptText, patient);
-        aiResponseText.innerHTML = window.gemini.formatMarkdown(responseText);
+        const responseData = await window.gemini.askGemini(promptText, patient);
+        const textToDisplay = (responseData && typeof responseData === 'object' && responseData.text)
+          ? responseData.text
+          : (typeof responseData === 'string' ? responseData : JSON.stringify(responseData));
+
+        aiResponseText.innerHTML = window.gemini.formatMarkdown(textToDisplay);
         aiResponseCard.classList.remove('hidden');
-        showToast('¡Respuesta recibida y guardada en la base de datos!', 'success');
+
+        const sourceLabel = (responseData && typeof responseData === 'object' && responseData.source === 'gemini')
+          ? `Google Gemini (${responseData.model || 'Cloud'})`
+          : 'Motor Clínico Basado en Evidencia';
+
+        showToast(`¡Respuesta generada de inmediato por ${sourceLabel}!`, 'success');
+
+        // Desplazamiento suave para visualizar la respuesta completa
+        setTimeout(() => {
+          aiResponseCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 120);
 
         renderModalAiHistory(selectedCode);
         if (state.currentView === 'evolucion') {
           renderEvolutionAISection(patient);
         }
       } catch (err) {
-        showToast(err.message || 'Error al consultar con Gemini', 'error');
+        console.error('Error al consultar Gemini:', err);
+        const fallback = window.gemini.generateImmediateClinicalResponse(promptText, patient);
+        aiResponseText.innerHTML = window.gemini.formatMarkdown(fallback);
+        aiResponseCard.classList.remove('hidden');
+        showToast('¡Respuesta generada de inmediato por el Asistente Clínico!', 'info');
       } finally {
         btnSendGeminiQuery.disabled = false;
         aiQueryLoading.classList.add('hidden');
+      }
+    });
+  }
+
+  if (aiCustomPromptInput) {
+    aiCustomPromptInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (btnSendGeminiQuery) btnSendGeminiQuery.click();
       }
     });
   }
@@ -1690,7 +1828,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCopyAiResponse.addEventListener('click', () => {
       const textToCopy = aiResponseText.innerText || aiResponseText.textContent;
       navigator.clipboard.writeText(textToCopy);
-      showToast('¡Respuesta de Gemini copiada!', 'success');
+      showToast('¡Respuesta clínica copiada al portapapeles!', 'success');
     });
   }
 
@@ -1726,6 +1864,465 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
       modalAiHistoryList.appendChild(item);
+    });
+  }
+
+
+  // ========================================================
+  // 7. PANTALLA: AGENDA Y PROGRAMACIÓN DE CITAS
+  // ========================================================
+  const btnOpenAppointmentModal = document.getElementById('btn-open-appointment-modal');
+  const btnCloseAppointmentModal = document.getElementById('btn-close-appointment-modal');
+  const btnCancelAppointmentModal = document.getElementById('btn-cancel-appointment-modal');
+  const modalNewAppointment = document.getElementById('modal-new-appointment');
+  const formNewAppointment = document.getElementById('form-new-appointment');
+  const aptPatientSelect = document.getElementById('apt-patient-select');
+  const aptInputDate = document.getElementById('apt-input-date');
+  const aptInputTime = document.getElementById('apt-input-time');
+  const aptInputType = document.getElementById('apt-input-type');
+  const aptInputModality = document.getElementById('apt-input-modality');
+  const aptInputReason = document.getElementById('apt-input-reason');
+  const aptInputNotes = document.getElementById('apt-input-notes');
+  const appointmentsCardsContainer = document.getElementById('appointments-cards-container');
+  const countAptsAll = document.getElementById('count-apts-all');
+  const countAptsPending = document.getElementById('count-apts-pending');
+  const countAptsDone = document.getElementById('count-apts-done');
+  const aptFilterButtons = document.querySelectorAll('.btn-apt-filter');
+
+  function renderAppointmentsView() {
+    if (!appointmentsCardsContainer) return;
+
+    const allApts = window.db ? window.db.getAppointments('todas') : [];
+    const filteredApts = window.db ? window.db.getAppointments(state.currentAptFilter) : [];
+
+    // Actualizar contadores
+    if (countAptsAll) countAptsAll.textContent = allApts.length;
+    if (countAptsPending) countAptsPending.textContent = allApts.filter(a => a.estado === 'programada').length;
+    if (countAptsDone) countAptsDone.textContent = allApts.filter(a => a.estado === 'completada').length;
+
+    // Actualizar estilos de los botones de filtro
+    aptFilterButtons.forEach(btn => {
+      const f = btn.dataset.filter;
+      if (f === state.currentAptFilter) {
+        btn.className = "btn-apt-filter px-3 py-1 rounded-full text-xs font-bold bg-primary-container text-white shadow-xs";
+      } else {
+        btn.className = "btn-apt-filter px-3 py-1 rounded-full text-xs font-medium bg-surface-container-low text-on-surface hover:bg-surface-container border border-outline-variant/30";
+      }
+    });
+
+    appointmentsCardsContainer.innerHTML = '';
+
+    if (filteredApts.length === 0) {
+      appointmentsCardsContainer.innerHTML = `
+        <div class="text-center py-10 px-4 bg-surface-container-lowest rounded-xl border border-dashed border-outline-variant/40 space-y-2">
+          <span class="material-symbols-outlined text-4xl text-outline">event_busy</span>
+          <p class="text-xs font-semibold text-on-surface">No hay citas en este filtro (${state.currentAptFilter})</p>
+          <p class="text-[11px] text-outline">Programa una nueva cita haciendo clic en "+ Programar Cita".</p>
+        </div>
+      `;
+      return;
+    }
+
+    filteredApts.forEach(apt => {
+      const patient = window.db ? window.db.getPatient(apt.codigoPaciente) : null;
+      const isCompleted = apt.estado === 'completada';
+      const isCancelled = apt.estado === 'cancelada';
+
+      const statusBadge = isCompleted 
+        ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ Completada</span>'
+        : isCancelled
+          ? '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">✕ Cancelada</span>'
+          : '<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">⏱ Programada</span>';
+
+      const card = document.createElement('article');
+      card.className = "bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-xs space-y-3";
+      card.innerHTML = `
+        <div class="flex items-start justify-between">
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-1 rounded-md bg-[#E8F3F1] border border-[#C5E2DC] text-[#0D7A68] font-mono-code font-bold text-xs">
+              ${escapeHtml(apt.codigoPaciente)}
+            </span>
+            <div>
+              <h4 class="text-xs font-bold text-on-surface">${escapeHtml(patient?.diagnostico || 'Paciente en tratamiento')}</h4>
+              <span class="text-[10px] text-outline">${escapeHtml(patient?.zona || 'Área general')}</span>
+            </div>
+          </div>
+          ${statusBadge}
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/30 text-xs">
+          <div class="flex items-center gap-1.5 text-on-surface">
+            <span class="material-symbols-outlined text-primary text-[16px]">calendar_today</span>
+            <span class="font-bold">${escapeHtml(apt.fecha)}</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-on-surface">
+            <span class="material-symbols-outlined text-primary text-[16px]">schedule</span>
+            <span class="font-mono-code font-semibold">${escapeHtml(apt.hora || '10:00 AM')}</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-secondary">
+            <span class="material-symbols-outlined text-primary text-[16px]">category</span>
+            <span class="truncate">${escapeHtml(apt.tipo || 'Sesión')}</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-secondary">
+            <span class="material-symbols-outlined text-primary text-[16px]">place</span>
+            <span>${escapeHtml(apt.modalidad || 'Presencial')}</span>
+          </div>
+        </div>
+
+        ${apt.motivo ? `
+          <p class="text-xs text-on-surface-variant font-medium">
+            <strong class="text-primary text-[11px] block">Objetivo de la cita:</strong>
+            ${escapeHtml(apt.motivo)}
+          </p>
+        ` : ''}
+
+        ${apt.notas ? `
+          <p class="text-[11px] text-outline bg-surface-bright/70 p-2 rounded-lg border border-outline-variant/20">
+            <strong>Indicaciones:</strong> ${escapeHtml(apt.notas)}
+          </p>
+        ` : ''}
+
+        <div class="flex items-center justify-between pt-2 border-t border-outline-variant/20">
+          <div class="flex gap-1.5">
+            <button type="button" class="btn-apt-toggle px-2.5 py-1 text-xs font-bold rounded-lg ${isCompleted ? 'bg-amber-100 text-amber-800 hover:bg-amber-200' : 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'} active:scale-95 transition-all">
+              ${isCompleted ? '↩ Reabrir Cita' : '✓ Marcar Completada'}
+            </button>
+            <button type="button" class="btn-apt-start-session px-2.5 py-1 text-xs font-bold rounded-lg bg-primary-container text-white hover:bg-primary active:scale-95 transition-all">
+              ▶ Iniciar Sesión
+            </button>
+          </div>
+          <button type="button" class="btn-apt-delete text-outline hover:text-error p-1 rounded-md" title="Eliminar cita">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      `;
+
+      // Eventos de la tarjeta
+      card.querySelector('.btn-apt-toggle').addEventListener('click', () => {
+        const nextState = isCompleted ? 'programada' : 'completada';
+        window.db.updateAppointment(apt.id, { estado: nextState });
+        showToast(isCompleted ? 'Cita reabierta como programada' : '¡Cita marcada como completada!', 'success');
+        renderAppointmentsView();
+      });
+
+      card.querySelector('.btn-apt-start-session').addEventListener('click', () => {
+        switchView('sesion', { patientCode: apt.codigoPaciente });
+      });
+
+      card.querySelector('.btn-apt-delete').addEventListener('click', () => {
+        if (confirm(`¿Deseas eliminar esta cita de ${apt.codigoPaciente}?`)) {
+          window.db.deleteAppointment(apt.id);
+          showToast('Cita eliminada', 'info');
+          renderAppointmentsView();
+        }
+      });
+
+      appointmentsCardsContainer.appendChild(card);
+    });
+  }
+
+  function openAppointmentModal(prefilledCode = null) {
+    const allPatients = window.db.getPatients();
+    if (allPatients.length === 0) {
+      showToast('Debes tener al menos un paciente registrado para programar citas', 'error');
+      switchView('pacientes');
+      return;
+    }
+
+    if (aptPatientSelect) {
+      aptPatientSelect.innerHTML = '';
+      allPatients.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.codigo;
+        opt.textContent = `${p.codigo} - ${p.diagnostico}`;
+        if (p.codigo === prefilledCode || p.codigo === state.selectedPatientCode) opt.selected = true;
+        aptPatientSelect.appendChild(opt);
+      });
+    }
+
+    if (aptInputDate) {
+      const today = new Date().toISOString().split('T')[0];
+      aptInputDate.value = today;
+    }
+
+    if (modalNewAppointment) {
+      modalNewAppointment.classList.remove('hidden');
+      modalNewAppointment.classList.add('flex');
+    }
+  }
+
+  function closeAppointmentModal() {
+    if (modalNewAppointment) {
+      modalNewAppointment.classList.add('hidden');
+      modalNewAppointment.classList.remove('flex');
+    }
+  }
+
+  if (btnOpenAppointmentModal) btnOpenAppointmentModal.addEventListener('click', () => openAppointmentModal());
+  if (btnCloseAppointmentModal) btnCloseAppointmentModal.addEventListener('click', closeAppointmentModal);
+  if (btnCancelAppointmentModal) btnCancelAppointmentModal.addEventListener('click', closeAppointmentModal);
+  if (modalNewAppointment) {
+    modalNewAppointment.addEventListener('click', (e) => {
+      if (e.target === modalNewAppointment) closeAppointmentModal();
+    });
+  }
+
+  aptFilterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.currentAptFilter = btn.dataset.filter;
+      renderAppointmentsView();
+    });
+  });
+
+  if (formNewAppointment) {
+    formNewAppointment.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = aptPatientSelect ? aptPatientSelect.value : state.selectedPatientCode;
+      const date = aptInputDate ? aptInputDate.value : new Date().toISOString().split('T')[0];
+      const time = aptInputTime ? aptInputTime.value.trim() : '10:00 AM';
+      const type = aptInputType ? aptInputType.value : 'Sesión de Rehabilitación';
+      const modality = aptInputModality ? aptInputModality.value : 'Presencial';
+      const reason = aptInputReason ? aptInputReason.value.trim() : '';
+      const notes = aptInputNotes ? aptInputNotes.value.trim() : '';
+
+      try {
+        window.db.addAppointment({
+          codigoPaciente: code,
+          fecha: date,
+          hora: time,
+          tipo: type,
+          modalidad: modality,
+          motivo: reason,
+          notas: notes,
+          estado: 'programada'
+        });
+        closeAppointmentModal();
+        showToast(`¡Cita programada para ${code} el ${date} a las ${time}!`, 'success');
+        if (state.currentView === 'citas') {
+          renderAppointmentsView();
+        }
+      } catch (err) {
+        showToast(err.message || 'Error al programar la cita', 'error');
+      }
+    });
+  }
+
+
+  // ========================================================
+  // 8. PANTALLA: PLANIFICACIÓN DE TERAPIA Y DIAGNÓSTICO CIF
+  // ========================================================
+  const planPatientBadge = document.getElementById('plan-patient-code-badge');
+  const planPatientTitle = document.getElementById('plan-patient-title');
+  const planPatientSelect = document.getElementById('plan-patient-select');
+  const btnPlanOptimizeGemini = document.getElementById('btn-plan-optimize-gemini');
+  const formTherapyPlan = document.getElementById('form-therapy-plan');
+  const planInputMedicalDiag = document.getElementById('plan-input-medical-diag');
+  const planInputFunctionalDiag = document.getElementById('plan-input-functional-diag');
+  const planInputCifStructure = document.getElementById('plan-input-cif-structure');
+  const planInputCifActivity = document.getElementById('plan-input-cif-activity');
+  const planInputCifParticipation = document.getElementById('plan-input-cif-participation');
+  const btnAddOrthopedicTest = document.getElementById('btn-add-orthopedic-test');
+  const planOrthopedicTestsList = document.getElementById('plan-orthopedic-tests-list');
+  const planInputPhase = document.getElementById('plan-input-phase');
+  const planInputFrequency = document.getElementById('plan-input-frequency');
+  const planInputShortGoals = document.getElementById('plan-input-short-goals');
+  const planInputLongGoals = document.getElementById('plan-input-long-goals');
+  const planInputApproach = document.getElementById('plan-input-approach');
+  const planInputClinicalCriteria = document.getElementById('plan-input-clinical-criteria');
+  const planInputRedFlags = document.getElementById('plan-input-red-flags');
+  const planInputYellowFlags = document.getElementById('plan-input-yellow-flags');
+
+  let currentPlanTests = [];
+
+  function renderPlanView(patientCode) {
+    const allPatients = window.db.getPatients();
+    if (allPatients.length === 0) {
+      showToast('No hay pacientes registrados', 'error');
+      switchView('pacientes');
+      return;
+    }
+
+    if (planPatientSelect) {
+      planPatientSelect.innerHTML = '';
+      allPatients.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.codigo;
+        opt.textContent = `${p.codigo} - ${p.diagnostico}`;
+        if (p.codigo === patientCode) opt.selected = true;
+        planPatientSelect.appendChild(opt);
+      });
+    }
+
+    const patient = window.db.getPatient(planPatientSelect.value) || allPatients[0];
+    state.selectedPatientCode = patient.codigo;
+
+    if (planPatientBadge) planPatientBadge.textContent = `#${patient.codigo}`;
+    if (planPatientTitle) planPatientTitle.textContent = `Plan Terapéutico: ${patient.diagnostico}`;
+
+    const plan = window.db.getTherapyPlan(patient.codigo);
+
+    if (planInputMedicalDiag) planInputMedicalDiag.value = plan.diagnosticoMedico || patient.diagnostico || '';
+    if (planInputFunctionalDiag) planInputFunctionalDiag.value = plan.diagnosticoFuncionalCIF || '';
+    if (planInputCifStructure) planInputCifStructure.value = plan.cifEstructura || '';
+    if (planInputCifActivity) planInputCifActivity.value = plan.cifActividad || '';
+    if (planInputCifParticipation) planInputCifParticipation.value = plan.cifParticipacion || '';
+    if (planInputPhase) planInputPhase.value = plan.faseRehabilitacion || 'Fase 1: Control de Dolor e Inflamación';
+    if (planInputFrequency) planInputFrequency.value = plan.frecuencia || '3 sesiones por semana';
+    if (planInputShortGoals) planInputShortGoals.value = plan.objetivosCortoPlazo || '';
+    if (planInputLongGoals) planInputLongGoals.value = plan.objetivosLargoPlazo || '';
+    if (planInputApproach) planInputApproach.value = plan.enfoqueTerapeutico || '';
+    if (planInputClinicalCriteria) planInputClinicalCriteria.value = plan.criterioClinico || '';
+    if (planInputRedFlags) planInputRedFlags.value = plan.banderasRojas || 'Descartadas / Sin signos de alarma médica';
+    if (planInputYellowFlags) planInputYellowFlags.value = plan.banderasAmarillas || 'Mínima aprensión al movimiento';
+
+    currentPlanTests = Array.isArray(plan.pruebasOrtopedicas) && plan.pruebasOrtopedicas.length > 0 
+      ? JSON.parse(JSON.stringify(plan.pruebasOrtopedicas)) 
+      : [
+          { nombre: 'Prueba de provocación / Palpación tendinosa', resultado: 'Positivo', hallazgos: 'Dolor punzante focal' },
+          { nombre: 'Prueba de contracción isométrica resistida', resultado: 'Positivo', hallazgos: 'Debilidad subjetiva por dolor' },
+          { nombre: 'Rango articular pasivo / goniometría', resultado: 'Negativo', hallazgos: 'Rango conservado y simétrico' }
+        ];
+
+    renderPlanOrthopedicTests();
+  }
+
+  function renderPlanOrthopedicTests() {
+    if (!planOrthopedicTestsList) return;
+    planOrthopedicTestsList.innerHTML = '';
+
+    currentPlanTests.forEach((t, idx) => {
+      const row = document.createElement('div');
+      row.className = "bg-surface-container-low p-2.5 rounded-xl border border-outline-variant/30 space-y-2";
+      row.innerHTML = `
+        <div class="flex items-center justify-between gap-2">
+          <input 
+            type="text" 
+            value="${escapeHtml(t.nombre)}" 
+            data-idx="${idx}" 
+            placeholder="Nombre de la prueba ortopédica..." 
+            class="test-name-input flex-1 bg-transparent font-bold text-xs text-on-surface border-b border-transparent focus:border-primary-container outline-none"
+          />
+          <div class="flex items-center gap-1.5">
+            <select data-idx="${idx}" class="test-result-select bg-surface-container-lowest border border-outline-variant/50 rounded-lg px-2 py-1 text-[11px] font-bold text-primary outline-none">
+              <option value="Positivo" ${t.resultado === 'Positivo' ? 'selected' : ''}>Positivo (+)</option>
+              <option value="Negativo" ${t.resultado === 'Negativo' ? 'selected' : ''}>Negativo (-)</option>
+              <option value="Dudoso" ${t.resultado === 'Dudoso' ? 'selected' : ''}>Dudoso (?)</option>
+              <option value="No Evaluado" ${t.resultado === 'No Evaluado' ? 'selected' : ''}>No Evaluado</option>
+            </select>
+            <button type="button" data-idx="${idx}" class="btn-remove-test text-outline hover:text-error p-1 rounded-md" title="Eliminar prueba">
+              <span class="material-symbols-outlined text-[16px]">close</span>
+            </button>
+          </div>
+        </div>
+        <div>
+          <input 
+            type="text" 
+            value="${escapeHtml(t.hallazgos || '')}" 
+            data-idx="${idx}" 
+            placeholder="Hallazgo clínico: dolor, crepitación, tope blando, traslación..." 
+            class="test-findings-input w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg px-2.5 py-1 text-[11px] text-on-surface-variant outline-none focus:border-primary-container"
+          />
+        </div>
+      `;
+
+      row.querySelector('.test-name-input').addEventListener('change', (e) => {
+        const i = parseInt(e.target.dataset.idx, 10);
+        if (currentPlanTests[i]) currentPlanTests[i].nombre = e.target.value.trim();
+      });
+
+      row.querySelector('.test-result-select').addEventListener('change', (e) => {
+        const i = parseInt(e.target.dataset.idx, 10);
+        if (currentPlanTests[i]) currentPlanTests[i].resultado = e.target.value;
+      });
+
+      row.querySelector('.test-findings-input').addEventListener('change', (e) => {
+        const i = parseInt(e.target.dataset.idx, 10);
+        if (currentPlanTests[i]) currentPlanTests[i].hallazgos = e.target.value.trim();
+      });
+
+      row.querySelector('.btn-remove-test').addEventListener('click', () => {
+        currentPlanTests.splice(idx, 1);
+        renderPlanOrthopedicTests();
+      });
+
+      planOrthopedicTestsList.appendChild(row);
+    });
+  }
+
+  if (btnAddOrthopedicTest) {
+    btnAddOrthopedicTest.addEventListener('click', () => {
+      currentPlanTests.push({
+        nombre: 'Nuevo Test Ortopédico / Funcional',
+        resultado: 'Positivo',
+        hallazgos: 'Respuesta clínica evaluada'
+      });
+      renderPlanOrthopedicTests();
+    });
+  }
+
+  if (planPatientSelect) {
+    planPatientSelect.addEventListener('change', () => {
+      renderPlanView(planPatientSelect.value);
+    });
+  }
+
+  if (formTherapyPlan) {
+    formTherapyPlan.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const code = planPatientSelect ? planPatientSelect.value : state.selectedPatientCode;
+
+      const planData = {
+        codigoPaciente: code,
+        diagnosticoMedico: planInputMedicalDiag ? planInputMedicalDiag.value.trim() : '',
+        diagnosticoFuncionalCIF: planInputFunctionalDiag ? planInputFunctionalDiag.value.trim() : '',
+        cifEstructura: planInputCifStructure ? planInputCifStructure.value.trim() : '',
+        cifActividad: planInputCifActivity ? planInputCifActivity.value.trim() : '',
+        cifParticipacion: planInputCifParticipation ? planInputCifParticipation.value.trim() : '',
+        faseRehabilitacion: planInputPhase ? planInputPhase.value : 'Fase 1',
+        frecuencia: planInputFrequency ? planInputFrequency.value : '3 sesiones por semana',
+        objetivosCortoPlazo: planInputShortGoals ? planInputShortGoals.value.trim() : '',
+        objetivosLargoPlazo: planInputLongGoals ? planInputLongGoals.value.trim() : '',
+        enfoqueTerapeutico: planInputApproach ? planInputApproach.value.trim() : '',
+        criterioClinico: planInputClinicalCriteria ? planInputClinicalCriteria.value.trim() : '',
+        banderasRojas: planInputRedFlags ? planInputRedFlags.value.trim() : '',
+        banderasAmarillas: planInputYellowFlags ? planInputYellowFlags.value.trim() : '',
+        pruebasOrtopedicas: currentPlanTests
+      };
+
+      try {
+        window.db.saveTherapyPlan(planData);
+        // Actualizar diagnóstico y fase del paciente si cambiaron
+        window.db.updatePatient(code, {
+          diagnostico: planData.diagnosticoMedico,
+          fase: planData.faseRehabilitacion
+        });
+        showToast(`¡Plan terapéutico y diagnóstico CIF guardados para ${code}!`, 'success');
+      } catch (err) {
+        showToast(err.message || 'Error al guardar el plan', 'error');
+      }
+    });
+  }
+
+  if (btnPlanOptimizeGemini) {
+    btnPlanOptimizeGemini.addEventListener('click', () => {
+      const code = planPatientSelect ? planPatientSelect.value : state.selectedPatientCode;
+      const patient = window.db.getPatient(code);
+      const plan = window.db.getTherapyPlan(code);
+
+      const promptOptimization = `Actúa como especialista clínico en Fisioterapia y Rehabilitación Física.
+Tengo el siguiente caso clínico:
+- Paciente: ${patient.codigo} (${patient.diagnostico}, ${patient.zona})
+- Diagnóstico Funcional CIF: ${plan.diagnosticoFuncionalCIF || 'Por definir'}
+- Fase actual: ${plan.faseRehabilitacion || 'Fase 1'}
+- Objetivos propuestos: ${plan.objetivosCortoPlazo || 'Control del dolor y recuperación de rango'}
+- Criterio clínico actual: ${plan.criterioClinico || 'Adaptación a cargas'}
+
+Por favor:
+1. Revisa y optimiza este plan terapéutico según las guías clínicas más recientes (JOSPT/Cochrane).
+2. Sugiere dosificación exacta de ejercicios (series, repeticiones, tempo y descanso).
+3. Establece 3 criterios objetivos para autorizar el avance hacia la siguiente fase de rehabilitación.`;
+
+      openGeminiModal(code, promptOptimization, true);
     });
   }
 
@@ -1776,6 +2373,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Reactividad ante cambios de datos
   window.addEventListener('fisioconecta:data-change', () => {
     if (state.currentView === 'pacientes') renderPatients();
+    else if (state.currentView === 'citas') renderAppointmentsView();
+    else if (state.currentView === 'sesion') prepareSessionForm(state.selectedPatientCode);
+    else if (state.currentView === 'plan') renderPlanView(state.selectedPatientCode);
     else if (state.currentView === 'evolucion') renderEvolutionView(state.selectedPatientCode);
   });
 

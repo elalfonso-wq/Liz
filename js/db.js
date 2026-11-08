@@ -18,6 +18,8 @@ const DB_KEYS = {
   PATIENTS: 'fisioconecta_patients_v1',
   SESSIONS: 'fisioconecta_sessions_v1',
   AI_QUERIES: 'fisioconecta_ai_queries_v1',
+  APPOINTMENTS: 'fisioconecta_appointments_v1',
+  THERAPY_PLANS: 'fisioconecta_plans_v1',
   GEMINI_KEY: 'fisioconecta_gemini_api_key'
 };
 
@@ -232,6 +234,95 @@ const SEED_AI_QUERIES = [
   }
 ];
 
+// Citas clínicas programadas iniciales
+const SEED_APPOINTMENTS = [
+  {
+    id: 'apt-842-1',
+    codigoPaciente: 'PAC-842',
+    fecha: '2025-03-31',
+    hora: '10:00 AM',
+    tipo: 'Sesión de Rehabilitación',
+    modalidad: 'Presencial',
+    estado: 'programada',
+    motivo: 'Progresión excéntrica de sentadilla y evaluación de dolor residual.',
+    notas: 'Paciente tolera sentadilla isométrica. Iniciar escalón 15 cm.'
+  },
+  {
+    id: 'apt-719-1',
+    codigoPaciente: 'PAC-719',
+    fecha: '2025-04-02',
+    hora: '09:00 AM',
+    tipo: 'Reevaluación de Control',
+    modalidad: 'Presencial',
+    estado: 'programada',
+    motivo: 'Control de dolor lumbar matutino y test de estabilidad lumbopélvica.',
+    notas: 'Revisar cumplimiento de ejercicios de core en casa.'
+  },
+  {
+    id: 'apt-603-1',
+    codigoPaciente: 'PAC-603',
+    fecha: '2025-04-04',
+    hora: '04:00 PM',
+    tipo: 'Test Funcional / Criterio de Alta',
+    modalidad: 'Presencial',
+    estado: 'programada',
+    motivo: 'Test de salto unipodal y dinamometría para alta definitiva.',
+    notas: 'Traer calzado deportivo habitual.'
+  }
+];
+
+// Planes terapéuticos y diagnóstico fisioterapéutico funcional (CIF)
+const SEED_THERAPY_PLANS = [
+  {
+    id: 'plan-PAC-842',
+    codigoPaciente: 'PAC-842',
+    diagnosticoMedico: 'Tendinopatía rotuliana rodilla derecha (Jumper\'s knee)',
+    diagnosticoFuncional: 'Deficiencia en la tolerancia de carga del tendón rotuliano con dolor a la flexión profunda (>80°) e inhibición refleja del cuádriceps. Limitación moderada para saltos y bajar escaleras.',
+    cifEstructura: 'Tendón rotuliano derecho con engrosamiento proximal doloroso a la palpación.',
+    cifActividad: 'Dificultad moderada para bajar escaleras y cambios de dirección.',
+    cifParticipacion: 'Restricción para práctica deportiva (baloncesto recreativo).',
+    fase: 'Fase 3: Fortalecimiento y Carga Excéntrica',
+    frecuenciaSemanal: '3 sesiones por semana',
+    objetivosCortoPlazo: '1. Reducir dolor matutino a EVA ≤ 2/10.\n2. Tolera sentadilla declinada 25° con 15 reps sin dolor reactivo a 24 horas.',
+    objetivosLargoPlazo: '1. Retorno al trote continuo y pliometría controlada.\n2. Alta funcional con simetría de fuerza >90% en salto monopodal.',
+    pruebasOrtopedicas: [
+      { test: 'Palpación polo inferior rótula', resultado: 'Positivo leve (EVA 2/10)' },
+      { test: 'Sentadilla declinada monopodal 25°', resultado: 'Positivo a 60° flexión' },
+      { test: 'Prueba de aprensión patelar', resultado: 'Negativo' }
+    ],
+    enfoqueTerapeutico: 'Isometría de alta carga (analgesia) + Progresión excéntrica lenta (Heavy Slow Resistance) + Fortalecimiento de cadera y tobillo.',
+    criterioClinico: 'El tendón responde favorablemente a la carga axial progresiva sin dolor inflamatorio reactivo. Regla clínica: el dolor durante el ejercicio no debe superar EVA 4/10 y debe retornar al estado basal dentro de las 24 horas siguientes.',
+    banderasRojas: 'Descartadas (sin derrame articular masivo, sin bloqueo mecánico ni antecedentes traumáticos de avulsión).',
+    banderasAmarillas: 'Leve aprensión al descender escaleras. Requiere refuerzo en educación en neurociencia del dolor.',
+    fechaCreacion: '2025-03-12',
+    fechaReevaluacion: '2025-04-15'
+  },
+  {
+    id: 'plan-PAC-719',
+    codigoPaciente: 'PAC-719',
+    diagnosticoMedico: 'Lumbalgia mecánica inespecífica / Síndrome facetario lumbar',
+    diagnosticoFuncional: 'Disfunción del control motor lumbopélvico con hipertonía reactiva de paravertebrales y déficit de resistencia del transverso abdominal y glúteo medio. Limitación para sedestación prolongada.',
+    cifEstructura: 'Segmento L4-S1 con rigidez articular y sensibilización miofascial.',
+    cifActividad: 'Intolerancia a bipedestación estática prolongada y flexión anterior de tronco.',
+    cifParticipacion: 'Dificultad en jornada laboral de oficina frente a computador.',
+    fase: 'Fase 2: Control Motor y Movilidad Lumbar',
+    frecuenciaSemanal: '2 sesiones por semana',
+    objetivosCortoPlazo: '1. Disminuir EVA de 6/10 a ≤ 4/10 en posición sedente.\n2. Activar transverso abdominal sin compensación de recto anterior.',
+    objetivosLargoPlazo: '1. Tolerar 2 horas de trabajo continuo sin dolor.\n2. Levantar cargas de 10 kg con técnica adecuada de bisagra de cadera.',
+    pruebasOrtopedicas: [
+      { test: 'Lasègue (SLR)', resultado: 'Negativo bilateral (sin radiculopatía)' },
+      { test: 'Test de extensión lumbar en bipedestación', resultado: 'Positivo (dolor localizado L5)' },
+      { test: 'Test de inestabilidad en prono', resultado: 'Positivo (alivia con activación muscular activa)' }
+    ],
+    enfoqueTerapeutico: 'Reeducación de control motor (Big 3 de McGill) + Terapia manual suave + Pautas ergonómicas de pausas activas.',
+    criterioClinico: 'Mecanismo de dolor predominantemente nociceptivo con componente postural y desacondicionamiento de estabilizadores profundos. Pronóstico muy favorable con ejercicio activo dosificado.',
+    banderasRojas: 'Descartadas (sin pérdida de sensibilidad en silla de montar, fuerza distal conservada L4-S1, reflejos simétricos).',
+    banderasAmarillas: 'Creencia de que flexionar la columna es peligroso. Trabajo de desensibilización y movimiento seguro gradual.',
+    fechaCreacion: '2025-03-05',
+    fechaReevaluacion: '2025-04-10'
+  }
+];
+
 class FisioDB {
   constructor() {
     this.firestore = null;
@@ -252,6 +343,14 @@ class FisioDB {
     const savedQueries = localStorage.getItem(DB_KEYS.AI_QUERIES);
     if (!savedQueries || JSON.parse(savedQueries).length === 0) {
       localStorage.setItem(DB_KEYS.AI_QUERIES, JSON.stringify(SEED_AI_QUERIES));
+    }
+    const savedAppointments = localStorage.getItem(DB_KEYS.APPOINTMENTS);
+    if (!savedAppointments || JSON.parse(savedAppointments).length === 0) {
+      localStorage.setItem(DB_KEYS.APPOINTMENTS, JSON.stringify(SEED_APPOINTMENTS));
+    }
+    const savedPlans = localStorage.getItem(DB_KEYS.THERAPY_PLANS);
+    if (!savedPlans || JSON.parse(savedPlans).length === 0) {
+      localStorage.setItem(DB_KEYS.THERAPY_PLANS, JSON.stringify(SEED_THERAPY_PLANS));
     }
 
     // 2. Conectar con Firebase Firestore si el SDK está cargado
@@ -316,6 +415,18 @@ class FisioDB {
           batch.set(docRef, q);
         });
 
+        const currentApts = this.getAppointments();
+        currentApts.forEach(a => {
+          const docRef = this.firestore.collection('citas').doc(a.id);
+          batch.set(docRef, a);
+        });
+
+        const currentPlans = this.getAllTherapyPlans();
+        currentPlans.forEach(pl => {
+          const docRef = this.firestore.collection('planes_terapia').doc(pl.id || ('plan-' + pl.codigoPaciente));
+          batch.set(docRef, pl);
+        });
+
         await batch.commit();
         console.log('✅ ¡Datos sincronizados con éxito en Firebase Firestore!');
       }
@@ -337,6 +448,44 @@ class FisioDB {
         }
       } catch (errQ) {
         console.warn('Nota sobre consultas_ia en Firestore:', errQ);
+      }
+
+      // 1.2 Si citas está vacía en Firestore, inicializarla
+      try {
+        const aptsSnapshot = await this.firestore.collection('citas').get();
+        if (aptsSnapshot.empty) {
+          const currentApts = this.getAppointments();
+          if (currentApts.length > 0) {
+            const batchApts = this.firestore.batch();
+            currentApts.forEach(a => {
+              const docRef = this.firestore.collection('citas').doc(a.id);
+              batchApts.set(docRef, a);
+            });
+            await batchApts.commit();
+            console.log('✅ Colección citas inicializada en Firestore');
+          }
+        }
+      } catch (errA) {
+        console.warn('Nota sobre citas en Firestore:', errA);
+      }
+
+      // 1.3 Si planes_terapia está vacía en Firestore, inicializarla
+      try {
+        const plansSnapshot = await this.firestore.collection('planes_terapia').get();
+        if (plansSnapshot.empty) {
+          const currentPlans = this.getAllTherapyPlans();
+          if (currentPlans.length > 0) {
+            const batchPlans = this.firestore.batch();
+            currentPlans.forEach(pl => {
+              const docRef = this.firestore.collection('planes_terapia').doc(pl.id || ('plan-' + pl.codigoPaciente));
+              batchPlans.set(docRef, pl);
+            });
+            await batchPlans.commit();
+            console.log('✅ Colección planes_terapia inicializada en Firestore');
+          }
+        }
+      } catch (errP) {
+        console.warn('Nota sobre planes_terapia en Firestore:', errP);
       }
 
       this.cloudStatus = { state: 'connected', message: 'Firebase Conectado en Tiempo Real' };
@@ -376,6 +525,30 @@ class FisioDB {
         }
       }, (error) => {
         console.warn('Error en listener de consultas IA:', error);
+      });
+
+      // 5. Escuchar cambios en tiempo real en 'citas'
+      this.firestore.collection('citas').onSnapshot((snapshot) => {
+        const cloudApts = [];
+        snapshot.forEach(doc => cloudApts.push(doc.data()));
+        if (cloudApts.length > 0) {
+          localStorage.setItem(DB_KEYS.APPOINTMENTS, JSON.stringify(cloudApts));
+          this.dispatchChangeEvent('appointments');
+        }
+      }, (error) => {
+        console.warn('Error en listener de citas:', error);
+      });
+
+      // 6. Escuchar cambios en tiempo real en 'planes_terapia'
+      this.firestore.collection('planes_terapia').onSnapshot((snapshot) => {
+        const cloudPlans = [];
+        snapshot.forEach(doc => cloudPlans.push(doc.data()));
+        if (cloudPlans.length > 0) {
+          localStorage.setItem(DB_KEYS.THERAPY_PLANS, JSON.stringify(cloudPlans));
+          this.dispatchChangeEvent('therapy_plans');
+        }
+      }, (error) => {
+        console.warn('Error en listener de planes_terapia:', error);
       });
 
       return { success: true, message: '¡Sincronización exitosa con Firebase Firestore!' };
@@ -523,6 +696,11 @@ class FisioDB {
       hora: sessionData.hora || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       duracionMin: sessionData.duracionMin || 45,
       nivelDolor: parseInt(sessionData.nivelDolor, 10),
+      tipoDolor: sessionData.tipoDolor || 'Sordo / Mecánico',
+      momentoDolor: sessionData.momentoDolor || 'Durante la carga',
+      criterioClinicoSesion: sessionData.criterioClinicoSesion?.trim() || '',
+      toleranciaCarga: sessionData.toleranciaCarga || 'adecuada',
+      banderaAlerta: sessionData.banderaAlerta || 'ninguna',
       ejercicios: sessionData.ejercicios || [],
       notas: sessionData.notas?.trim() || ''
     };
@@ -655,6 +833,154 @@ class FisioDB {
     }
 
     return newQuery;
+  }
+
+  // ================= CITAS / AGENDA CLÍNICA =================
+  getAppointments(codigoPaciente = null) {
+    try {
+      const data = localStorage.getItem(DB_KEYS.APPOINTMENTS);
+      let list = data ? JSON.parse(data) : [];
+      if (codigoPaciente) {
+        const cod = codigoPaciente.trim().toUpperCase();
+        list = list.filter(a => a.codigoPaciente?.trim().toUpperCase() === cod);
+      }
+      return list.sort((a, b) => new Date(`${a.fecha}T${a.hora || '00:00'}`) - new Date(`${b.fecha}T${b.hora || '00:00'}`));
+    } catch (e) {
+      return [];
+    }
+  }
+
+  saveAppointmentsLocal(apts) {
+    localStorage.setItem(DB_KEYS.APPOINTMENTS, JSON.stringify(apts));
+    this.dispatchChangeEvent('appointments');
+  }
+
+  addAppointment(aptData) {
+    const list = this.getAppointments();
+    const codigoPaciente = aptData.codigoPaciente ? aptData.codigoPaciente.trim().toUpperCase() : 'GENERAL';
+
+    const newApt = {
+      id: 'apt-' + Date.now(),
+      codigoPaciente,
+      fecha: aptData.fecha || new Date().toISOString().split('T')[0],
+      hora: aptData.hora || '10:00 AM',
+      tipo: aptData.tipo || 'Sesión de Rehabilitación',
+      modalidad: aptData.modalidad || 'Presencial',
+      estado: aptData.estado || 'programada',
+      motivo: aptData.motivo?.trim() || 'Sesión clínica de tratamiento fisioterapéutico',
+      notas: aptData.notas?.trim() || ''
+    };
+
+    list.unshift(newApt);
+    this.saveAppointmentsLocal(list);
+
+    if (this.isCloudEnabled && this.firestore) {
+      this.firestore.collection('citas').doc(newApt.id).set(newApt)
+        .catch(err => console.error('Error guardando cita en Firestore:', err));
+    }
+
+    return newApt;
+  }
+
+  updateAppointment(id, updates) {
+    let list = this.getAppointments();
+    const idx = list.findIndex(a => a.id === id);
+    if (idx !== -1) {
+      list[idx] = { ...list[idx], ...updates };
+      this.saveAppointmentsLocal(list);
+
+      if (this.isCloudEnabled && this.firestore) {
+        this.firestore.collection('citas').doc(id).update(updates)
+          .catch(err => console.error('Error actualizando cita en Firestore:', err));
+      }
+      return list[idx];
+    }
+    return null;
+  }
+
+  deleteAppointment(id) {
+    let list = this.getAppointments();
+    list = list.filter(a => a.id !== id);
+    this.saveAppointmentsLocal(list);
+
+    if (this.isCloudEnabled && this.firestore) {
+      this.firestore.collection('citas').doc(id).delete()
+        .catch(err => console.error('Error eliminando cita en Firestore:', err));
+    }
+  }
+
+  // ================= PLANES DE TERAPIA Y DIAGNÓSTICO (CIF) =================
+  getAllTherapyPlans() {
+    try {
+      const data = localStorage.getItem(DB_KEYS.THERAPY_PLANS);
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  getTherapyPlan(codigoPaciente) {
+    if (!codigoPaciente) return null;
+    const cod = codigoPaciente.trim().toUpperCase();
+    const list = this.getAllTherapyPlans();
+    const existing = list.find(p => p.codigoPaciente?.trim().toUpperCase() === cod);
+    if (existing) return existing;
+
+    // Plan base por defecto si aún no ha sido redactado
+    const patient = this.getPatient(cod);
+    return {
+      id: 'plan-' + cod,
+      codigoPaciente: cod,
+      diagnosticoMedico: patient?.diagnostico || 'Lesión en evaluación',
+      diagnosticoFuncional: 'Deficiencia en fuerza y movilidad funcional. Limitación leve a moderada en actividades de la vida diaria.',
+      cifEstructura: `${patient?.zona || 'Región corporal'} con alteración biomecánica y sobrecarga tisular.`,
+      cifActividad: 'Dificultad en movimientos repetitivos y soporte de peso corporal.',
+      cifParticipacion: 'Restricción laboral o deportiva según nivel de dolor.',
+      fase: patient?.fase || 'Fase 2: Movilidad y Carga Isométrica',
+      frecuenciaSemanal: '2 a 3 sesiones por semana',
+      objetivosCortoPlazo: '1. Reducir dolor EVA a ≤ 3/10 en reposo y carga leve.\n2. Recuperar arcos de movilidad sin dolor punzante.',
+      objetivosLargoPlazo: '1. Retorno seguro y simétrico a actividades cotidianas y deportivas.\n2. Autonomía en pautas de automanejo domiciliario.',
+      pruebasOrtopedicas: [
+        { test: 'Evaluación de rangos articulares activos/pasivos', resultado: 'Limitación en arcos finales' },
+        { test: 'Palpación tisular y provocación de dolor', resultado: 'Sensibilidad localizada' }
+      ],
+      enfoqueTerapeutico: 'Ejercicio terapéutico progresivo + Terapia manual ortopédica + Educación en neurobiología del dolor.',
+      criterioClinico: 'El paciente presenta buena capacidad de respuesta biológica al estímulo de carga controlada. Se prioriza el respeto del umbral analgésico.',
+      banderasRojas: 'Descartadas tras valoración inicial.',
+      banderasAmarillas: 'Manejo de kinesiofobia y reaseguramiento de seguridad motora.',
+      fechaCreacion: new Date().toISOString().split('T')[0],
+      fechaReevaluacion: ''
+    };
+  }
+
+  saveTherapyPlan(planData) {
+    const list = this.getAllTherapyPlans();
+    const cod = planData.codigoPaciente.trim().toUpperCase();
+    const planId = planData.id || ('plan-' + cod);
+
+    const fullPlan = {
+      ...planData,
+      id: planId,
+      codigoPaciente: cod,
+      fechaActualizacion: new Date().toISOString().split('T')[0]
+    };
+
+    const idx = list.findIndex(p => p.codigoPaciente?.trim().toUpperCase() === cod);
+    if (idx !== -1) {
+      list[idx] = fullPlan;
+    } else {
+      list.push(fullPlan);
+    }
+
+    localStorage.setItem(DB_KEYS.THERAPY_PLANS, JSON.stringify(list));
+    this.dispatchChangeEvent('therapy_plans');
+
+    if (this.isCloudEnabled && this.firestore) {
+      this.firestore.collection('planes_terapia').doc(planId).set(fullPlan)
+        .catch(err => console.error('Error guardando plan terapéutico en Firestore:', err));
+    }
+
+    return fullPlan;
   }
 
   isFirebaseConnected() {

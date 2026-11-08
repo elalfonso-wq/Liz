@@ -312,6 +312,31 @@
             Estable
           </span>
         </div>
+
+        <!-- Características clínicas del dolor -->
+        <div class="grid grid-cols-2 gap-2 pt-1 border-t border-outline-variant/20">
+          <div>
+            <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Tipo de Dolor Clínico</label>
+            <select id="session-input-pain-type" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface focus:border-primary-container outline-none font-medium">
+              <option value="Sordo / Mecánico (Sobrecarga)">Sordo / Mecánico</option>
+              <option value="Punzante / Agudo (Reactivo)">Punzante / Agudo</option>
+              <option value="Opresivo / Fatiga muscular">Opresivo / Fatiga muscular</option>
+              <option value="Urente / Quemante (Sensibilización)">Urente / Quemante</option>
+              <option value="Irradiado / Radicular (Neural)">Irradiado / Neural</option>
+              <option value="Rigidez articular matutina">Rigidez articular</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Momento de Aparición</label>
+            <select id="session-input-pain-timing" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface focus:border-primary-container outline-none font-medium">
+              <option value="Durante la carga / ejercicio">Durante la carga</option>
+              <option value="Al inicio del movimiento">Al inicio del movimiento</option>
+              <option value="Al final de la sesión">Al final de la sesión</option>
+              <option value="En reposo postural">En reposo postural</option>
+              <option value="Post-esfuerzo (>2h después)">Post-esfuerzo tardío</option>
+            </select>
+          </div>
+        </div>
       </section>
 
       <!-- SECCIÓN EJERCICIOS REALIZADOS O INDICADOS -->
@@ -319,7 +344,7 @@
         <div class="flex items-center justify-between px-1">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-[20px]">fitness_center</span>
-            <h3 class="text-sm font-bold text-on-surface">Ejercicios Realizados</h3>
+            <h3 class="text-sm font-bold text-on-surface">Prescripción y Dosificación de Ejercicios</h3>
           </div>
           <span id="session-exercise-count-label" class="text-xs text-on-surface-variant font-medium">0 ejercicios</span>
         </div>
@@ -345,7 +370,7 @@
                 <input 
                   type="text" 
                   id="input-new-exercise-name" 
-                  placeholder="Ej. Isometría de cuádriceps, Sentadilla..." 
+                  placeholder="Ej. Isometría de cuádriceps, Sentadilla búlgara..." 
                   class="flex-1 bg-surface-container-low border border-outline-variant/60 rounded-lg px-3 py-2 text-xs text-on-surface focus:border-primary-container outline-none"
                 />
                 <button type="button" id="btn-add-exercise" class="px-4 py-2 bg-primary-container text-white text-xs font-bold rounded-lg hover:bg-primary active:scale-95 transition-all shadow-sm">
@@ -365,18 +390,52 @@
         </div>
       </section>
 
-      <!-- SECCIÓN NOTAS CLÍNICAS -->
-      <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-sm space-y-2">
+      <!-- SECCIÓN CRITERIO CLÍNICO DEL FISIOTERAPEUTA -->
+      <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-sm space-y-3">
         <div class="flex items-center gap-2">
-          <span class="material-symbols-outlined text-primary text-[20px]">notes</span>
-          <h3 class="text-sm font-bold text-on-surface">Observaciones Clínicas del Terapeuta</h3>
+          <span class="material-symbols-outlined text-primary text-[20px]">psychology</span>
+          <h3 class="text-sm font-bold text-on-surface">Criterio Clínico y Razonamiento Fisioterapéutico</h3>
         </div>
-        <textarea 
-          id="session-input-notes" 
-          rows="3" 
-          placeholder="Anota la respuesta del paciente, tolerancia a las cargas, dolor compensatorio o recomendaciones para casa..." 
-          class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2.5 text-xs text-on-surface focus:border-primary-container outline-none resize-none leading-relaxed"
-        ></textarea>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Respuesta y Tolerancia a la Carga</label>
+            <select id="session-input-load-tolerance" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface focus:border-primary-container outline-none font-medium">
+              <option value="Excelente tolerancia sin reactividad">Excelente tolerancia</option>
+              <option value="Fatiga muscular adecuada sin dolor">Fatiga adecuada (sin dolor)</option>
+              <option value="Molestia leve autolimitada (EVA ≤ 3)">Molestia leve tolerable</option>
+              <option value="Dolor reactivo (reducir carga)">Dolor reactivo (reducir carga)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Banderas de Alerta</label>
+            <select id="session-input-red-flags" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface focus:border-primary-container outline-none font-medium">
+              <option value="ninguna">Sin banderas (Seguro)</option>
+              <option value="amarilla">Bandera Amarilla (Kinesiofobia)</option>
+              <option value="roja">Bandera Roja (Alarma médica)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Criterio Clínico / Decisión Terapéutica</label>
+          <textarea 
+            id="session-input-clinical-reasoning" 
+            rows="2" 
+            placeholder="Justificación del terapeuta sobre la respuesta del tejido, ajuste de cargas y progresión hacia la siguiente fase..." 
+            class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface focus:border-primary-container outline-none resize-none leading-relaxed"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Pautas y Recomendaciones Domiciliarias</label>
+          <textarea 
+            id="session-input-notes" 
+            rows="2" 
+            placeholder="Ejercicios para realizar en casa, dosificación de caminata o descanso activo..." 
+            class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface focus:border-primary-container outline-none resize-none leading-relaxed"
+          ></textarea>
+        </div>
       </section>
 
       <!-- BOTÓN FINALIZAR Y GUARDAR SESIÓN -->
@@ -387,6 +446,217 @@
         </button>
       </div>
 
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- PANTALLA: AGENDA Y PROGRAMACIÓN DE CITAS                 -->
+    <!-- ======================================================== -->
+    <main id="view-citas" class="view-container hidden flex-1 px-4 pt-3 space-y-4">
+      <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[24px]">calendar_month</span>
+            <div>
+              <h2 class="text-base font-bold text-on-surface">Agenda de Citas Clínicas</h2>
+              <span class="text-xs text-on-surface-variant">Programación y seguimiento de sesiones</span>
+            </div>
+          </div>
+          <button id="btn-open-appointment-modal" class="px-3.5 py-2 bg-primary-container text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-primary active:scale-95 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>+ Programar Cita</span>
+          </button>
+        </div>
+
+        <div class="flex gap-1.5 overflow-x-auto no-scrollbar pt-1">
+          <button type="button" class="btn-apt-filter px-3 py-1 rounded-full text-xs font-bold bg-primary-container text-white shadow-xs" data-filter="todas">
+            Todas (<span id="count-apts-all">0</span>)
+          </button>
+          <button type="button" class="btn-apt-filter px-3 py-1 rounded-full text-xs font-medium bg-surface-container-low text-on-surface hover:bg-surface-container border border-outline-variant/30" data-filter="programada">
+            Programadas (<span id="count-apts-pending">0</span>)
+          </button>
+          <button type="button" class="btn-apt-filter px-3 py-1 rounded-full text-xs font-medium bg-surface-container-low text-on-surface hover:bg-surface-container border border-outline-variant/30" data-filter="completada">
+            Completadas (<span id="count-apts-done">0</span>)
+          </button>
+        </div>
+      </section>
+
+      <section class="space-y-3">
+        <div id="appointments-cards-container" class="space-y-2.5">
+          <!-- Inyectado por JS -->
+        </div>
+      </section>
+    </main>
+
+    <!-- ======================================================== -->
+    <!-- PANTALLA: PLANIFICACIÓN DE TERAPIA Y DIAGNÓSTICO (CIF)    -->
+    <!-- ======================================================== -->
+    <main id="view-plan" class="view-container hidden flex-1 px-4 pt-3 space-y-4">
+      <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-sm space-y-3">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="plan-patient-code-badge" class="font-mono-code font-bold text-xs bg-surface-container text-primary px-3 py-1 rounded-full border border-secondary-container">
+                #PAC-842
+              </span>
+              <span class="text-[11px] font-semibold text-secondary bg-surface-bright px-2 py-0.5 rounded-full border border-secondary-container">
+                Plan Terapéutico
+              </span>
+            </div>
+            <h2 id="plan-patient-title" class="text-base font-bold text-on-surface mt-1.5">
+              Planificación y Diagnóstico Funcional
+            </h2>
+          </div>
+
+          <div class="w-36">
+            <label class="block text-[10px] text-outline mb-0.5">Paciente:</label>
+            <select id="plan-patient-select" class="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg p-1.5 text-xs font-bold text-primary outline-none">
+              <!-- Dinámico -->
+            </select>
+          </div>
+        </div>
+
+        <div class="flex gap-2 pt-1 border-t border-outline-variant/20">
+          <button type="button" id="btn-plan-optimize-gemini" class="flex-1 py-2 bg-gradient-to-r from-emerald-700 to-teal-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 hover:opacity-95 active:scale-95 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[16px] text-amber-300">psychology</span>
+            <span>Optimizar Plan con IA Gemini</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- FORMULARIO DEL PLAN Y DIAGNÓSTICO -->
+      <form id="form-therapy-plan" class="space-y-4">
+        <!-- 1. DIAGNÓSTICOS (MÉDICO Y FUNCIONAL CIF) -->
+        <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-sm space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">medical_information</span>
+            <h3 class="text-sm font-bold text-on-surface">Diagnósticos Clínicos</h3>
+          </div>
+
+          <div class="space-y-2.5">
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Diagnóstico Médico de Remisión / Ortopédico</label>
+              <input type="text" id="plan-input-medical-diag" placeholder="Ej. Tendinopatía rotuliana rodilla derecha" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2.5 text-xs text-on-surface focus:border-primary-container outline-none font-semibold"/>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Diagnóstico Fisioterapéutico Funcional (Modelo CIF)</label>
+              <textarea id="plan-input-functional-diag" rows="2" placeholder="Déficit biomecánico, limitaciones en actividades y restricciones de participación..." class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2.5 text-xs text-on-surface focus:border-primary-container outline-none leading-relaxed"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 pt-1">
+              <div class="bg-surface-bright p-2 rounded-lg border border-outline-variant/20">
+                <span class="text-[10px] font-bold text-primary block">Estructuras / Funciones:</span>
+                <input type="text" id="plan-input-cif-structure" placeholder="Ej. Tendón engrosado, debilidad" class="w-full bg-transparent border-0 p-0 text-[11px] text-on-surface outline-none mt-0.5"/>
+              </div>
+              <div class="bg-surface-bright p-2 rounded-lg border border-outline-variant/20">
+                <span class="text-[10px] font-bold text-primary block">Limitación en Actividades:</span>
+                <input type="text" id="plan-input-cif-activity" placeholder="Ej. Bajar escaleras, saltos" class="w-full bg-transparent border-0 p-0 text-[11px] text-on-surface outline-none mt-0.5"/>
+              </div>
+              <div class="bg-surface-bright p-2 rounded-lg border border-outline-variant/20">
+                <span class="text-[10px] font-bold text-primary block">Restricción Participación:</span>
+                <input type="text" id="plan-input-cif-participation" placeholder="Ej. Práctica deportiva, laboral" class="w-full bg-transparent border-0 p-0 text-[11px] text-on-surface outline-none mt-0.5"/>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. PRUEBAS ORTOPÉDICAS Y TESTS FUNCIONALES -->
+        <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-[20px]">fact_check</span>
+              <h3 class="text-sm font-bold text-on-surface">Pruebas Ortopédicas y Tests Especiales</h3>
+            </div>
+            <button type="button" id="btn-add-orthopedic-test" class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5">
+              + Agregar Test
+            </button>
+          </div>
+
+          <div id="plan-orthopedic-tests-list" class="space-y-2">
+            <!-- Filas de tests ortopédicos -->
+          </div>
+        </section>
+
+        <!-- 3. PLANIFICACIÓN DE TERAPIA Y OBJETIVOS -->
+        <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-sm space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">track_changes</span>
+            <h3 class="text-sm font-bold text-on-surface">Plan Terapéutico y Dosificación</h3>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Fase de Rehabilitación</label>
+              <select id="plan-input-phase" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface focus:border-primary-container outline-none font-semibold">
+                <option value="Fase 1: Control de Dolor e Inflamación">Fase 1: Control de Dolor e Inflamación</option>
+                <option value="Fase 2: Movilidad y Carga Isométrica">Fase 2: Movilidad y Carga Isométrica</option>
+                <option value="Fase 3: Fortalecimiento y Carga Excéntrica">Fase 3: Fortalecimiento y Carga Excéntrica</option>
+                <option value="Fase 4: Readaptación Funcional y Retorno Deportivo">Fase 4: Readaptación Funcional y Retorno</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Frecuencia Recomendada</label>
+              <select id="plan-input-frequency" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface focus:border-primary-container outline-none font-semibold">
+                <option value="1 sesión por semana">1 sesión por semana</option>
+                <option value="2 sesiones por semana">2 sesiones por semana</option>
+                <option value="3 sesiones por semana" selected>3 sesiones por semana</option>
+                <option value="4 sesiones por semana">4 sesiones por semana</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Objetivos a Corto Plazo (1 - 3 Semanas)</label>
+              <textarea id="plan-input-short-goals" rows="2" placeholder="Ej. Disminuir EVA a ≤ 3/10, restaurar 110° de flexión..." class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2.5 text-xs text-on-surface focus:border-primary-container outline-none leading-relaxed"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Objetivos a Largo Plazo (4 - 8 Semanas / Alta)</label>
+              <textarea id="plan-input-long-goals" rows="2" placeholder="Ej. Retorno a carrera continua, alta funcional sin reactividad..." class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2.5 text-xs text-on-surface focus:border-primary-container outline-none leading-relaxed"></textarea>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Enfoque Terapéutico Principal</label>
+              <input type="text" id="plan-input-approach" placeholder="Ej. Isometría de alta carga + Progresión excéntrica lenta + Control motor" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2.5 text-xs text-on-surface focus:border-primary-container outline-none"/>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. CRITERIO CLÍNICO DEL FISIOTERAPEUTA -->
+        <section class="bg-surface-container-lowest rounded-xl p-4 border border-outline-variant/40 shadow-sm space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[20px]">psychology</span>
+            <h3 class="text-sm font-bold text-on-surface">Criterio Clínico y Razonamiento Fisioterapéutico</h3>
+          </div>
+
+          <div class="space-y-2">
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Hipótesis Clínica de Carga y Tolerancia Tisular</label>
+              <textarea id="plan-input-clinical-criteria" rows="3" placeholder="Justificación del fisioterapeuta sobre la progresión de cargas, mecanismo lesional y capacidad adaptativa..." class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2.5 text-xs text-on-surface focus:border-primary-container outline-none leading-relaxed"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+              <div>
+                <label class="block text-[11px] font-semibold text-rose-700 mb-0.5">Banderas Rojas (Signos de Alarma Médica)</label>
+                <input type="text" id="plan-input-red-flags" placeholder="Descartadas / Sin signos de alerta" class="w-full bg-rose-50/60 border border-rose-200 rounded-lg p-2 text-xs text-rose-900 focus:border-rose-400 outline-none"/>
+              </div>
+              <div>
+                <label class="block text-[11px] font-semibold text-amber-700 mb-0.5">Banderas Amarillas (Factores Psicosociales)</label>
+                <input type="text" id="plan-input-yellow-flags" placeholder="Kinesiofobia leve, educación en dolor" class="w-full bg-amber-50/60 border border-amber-200 rounded-lg p-2 text-xs text-amber-900 focus:border-amber-400 outline-none"/>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- BOTÓN GUARDAR PLAN -->
+        <div class="pt-2 sticky bottom-20 z-30">
+          <button type="submit" id="btn-save-therapy-plan" class="w-full h-12 bg-primary-container text-white text-sm font-bold rounded-xl flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(13,122,104,0.25)] hover:bg-primary active:scale-[0.98] transition-all">
+            <span class="material-symbols-outlined text-[20px]">save</span>
+            <span>Guardar Plan Terapéutico y Diagnóstico</span>
+          </button>
+        </div>
+      </form>
     </main>
 
     <!-- ======================================================== -->
@@ -777,6 +1047,16 @@
             <span>Consultar con Asistente IA (Gemini)</span>
           </button>
 
+          <button id="btn-action-schedule-apt" class="w-full h-11 bg-surface-container-low border border-outline-variant/40 text-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-surface-container active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[18px] text-primary">calendar_add_on</span>
+            <span>Programar Cita Fisioterapéutica</span>
+          </button>
+
+          <button id="btn-action-view-plan" class="w-full h-11 bg-surface-container-low border border-outline-variant/40 text-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-surface-container active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[18px] text-primary">assignment</span>
+            <span>Plan Terapéutico y Diagnóstico (CIF)</span>
+          </button>
+
           <button id="btn-action-new-session" class="w-full h-11 bg-primary-container text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-primary active:scale-95 transition-all shadow-sm">
             <span class="material-symbols-outlined text-[18px]">edit_calendar</span>
             <span>Registrar Nueva Sesión</span>
@@ -792,6 +1072,82 @@
             <span>Eliminar Ficha</span>
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- MODAL: PROGRAMAR CITA CLÍNICA                            -->
+    <!-- ======================================================== -->
+    <div id="modal-new-appointment" class="fixed inset-0 z-50 bg-[#1E2928]/60 backdrop-blur-sm hidden items-center justify-center p-4">
+      <div class="bg-surface-container-lowest rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-outline-variant/30 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[24px]">calendar_add_on</span>
+            <h4 class="text-base font-bold text-on-surface">Programar Cita Fisioterapéutica</h4>
+          </div>
+          <button id="btn-close-appointment-modal" class="text-outline hover:text-on-surface p-1 rounded-lg">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <form id="form-new-appointment" class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-on-surface-variant mb-1">Paciente</label>
+            <select id="apt-patient-select" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs font-bold text-primary outline-none">
+              <!-- Dinámico -->
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Fecha</label>
+              <input type="date" id="apt-input-date" required class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface outline-none"/>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Hora</label>
+              <input type="text" id="apt-input-time" value="10:00 AM" placeholder="Ej. 10:00 AM" required class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface outline-none"/>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Tipo de Cita</label>
+              <select id="apt-input-type" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface outline-none">
+                <option value="Sesión de Rehabilitación">Sesión de Rehabilitación</option>
+                <option value="Evaluación / Diagnóstico">Evaluación / Diagnóstico</option>
+                <option value="Reevaluación de Control">Reevaluación de Control</option>
+                <option value="Test Funcional / Criterio de Alta">Test Funcional / Alta</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-on-surface-variant mb-1">Modalidad</label>
+              <select id="apt-input-modality" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface outline-none">
+                <option value="Presencial">Presencial</option>
+                <option value="Domiciliaria">Domiciliaria</option>
+                <option value="Telefisioterapia">Telefisioterapia</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-on-surface-variant mb-1">Motivo / Objetivo de la Cita</label>
+            <input type="text" id="apt-input-reason" placeholder="Ej. Progresión de cargas excéntricas y evaluación de dolor" class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface outline-none"/>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-on-surface-variant mb-1">Notas Preparatorias / Indicaciones</label>
+            <textarea id="apt-input-notes" rows="2" placeholder="Indicaciones para el paciente o recordatorios para la sesión..." class="w-full bg-surface-container-low border border-outline-variant/60 rounded-lg p-2 text-xs text-on-surface outline-none resize-none"></textarea>
+          </div>
+
+          <div class="flex gap-2 pt-2 border-t border-outline-variant/20">
+            <button type="button" id="btn-cancel-appointment-modal" class="flex-1 py-2 text-xs font-semibold text-outline hover:text-on-surface bg-surface-container-low rounded-xl">
+              Cancelar
+            </button>
+            <button type="submit" class="flex-1 py-2 text-xs font-bold text-white bg-primary-container hover:bg-primary rounded-xl shadow-sm">
+              Guardar Cita
+            </button>
+          </div>
+        </form>
       </div>
     </div>
 
@@ -1004,24 +1360,36 @@
     <!-- ======================================================== -->
     <!-- BARRA DE NAVEGACIÓN INFERIOR (BottomNav)                 -->
     <!-- ======================================================== -->
-    <nav class="fixed bottom-0 left-0 w-full z-40 flex justify-around items-center px-4 py-2 h-16 max-w-screen-md mx-auto bg-surface-container-lowest shadow-[0_-4px_16px_rgba(13,122,104,0.06)] border-t border-outline-variant/30">
+    <nav class="fixed bottom-0 left-0 w-full z-40 flex justify-between items-center px-2 py-1.5 h-16 max-w-screen-md mx-auto bg-surface-container-lowest shadow-[0_-4px_16px_rgba(13,122,104,0.06)] border-t border-outline-variant/30">
       
       <!-- Pestaña 1: Pacientes -->
-      <button id="tab-nav-pacientes" class="nav-tab flex flex-col items-center justify-center text-primary bg-secondary-container/40 rounded-xl px-4 py-1.5 transition-all active:scale-95">
-        <span class="material-symbols-outlined text-[22px] icon-fill">group</span>
-        <span class="text-[11px] font-bold tracking-tight">Pacientes</span>
+      <button id="tab-nav-pacientes" class="nav-tab flex-1 flex flex-col items-center justify-center text-primary bg-secondary-container/40 rounded-xl py-1 transition-all active:scale-95">
+        <span class="material-symbols-outlined text-[20px] icon-fill">group</span>
+        <span class="text-[10px] font-bold tracking-tight">Pacientes</span>
       </button>
 
-      <!-- Pestaña 2: Nueva Sesión -->
-      <button id="tab-nav-sesion" class="nav-tab flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-4 py-1.5 transition-colors active:scale-95">
-        <span class="material-symbols-outlined text-[22px]">edit_calendar</span>
-        <span class="text-[11px] font-medium">Nueva Sesión</span>
+      <!-- Pestaña 2: Citas / Agenda -->
+      <button id="tab-nav-citas" class="nav-tab flex-1 flex flex-col items-center justify-center text-on-surface-variant hover:text-primary rounded-xl py-1 transition-colors active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">calendar_month</span>
+        <span class="text-[10px] font-medium">Citas</span>
       </button>
 
-      <!-- Pestaña 3: Evolución -->
-      <button id="tab-nav-evolucion" class="nav-tab flex flex-col items-center justify-center text-on-surface-variant hover:text-primary px-4 py-1.5 transition-colors active:scale-95">
-        <span class="material-symbols-outlined text-[22px]">monitoring</span>
-        <span class="text-[11px] font-medium">Evolución</span>
+      <!-- Pestaña 3: Nueva Sesión -->
+      <button id="tab-nav-sesion" class="nav-tab flex-1 flex flex-col items-center justify-center text-on-surface-variant hover:text-primary rounded-xl py-1 transition-colors active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">edit_calendar</span>
+        <span class="text-[10px] font-medium">Sesión</span>
+      </button>
+
+      <!-- Pestaña 4: Plan & Diagnóstico -->
+      <button id="tab-nav-plan" class="nav-tab flex-1 flex flex-col items-center justify-center text-on-surface-variant hover:text-primary rounded-xl py-1 transition-colors active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">assignment</span>
+        <span class="text-[10px] font-medium">Plan/Diag</span>
+      </button>
+
+      <!-- Pestaña 5: Evolución -->
+      <button id="tab-nav-evolucion" class="nav-tab flex-1 flex flex-col items-center justify-center text-on-surface-variant hover:text-primary rounded-xl py-1 transition-colors active:scale-95">
+        <span class="material-symbols-outlined text-[20px]">monitoring</span>
+        <span class="text-[10px] font-medium">Evolución</span>
       </button>
     </nav>
 
